@@ -10,7 +10,7 @@ export default function LoginSuccess() {
   const { profile } = useApp();
 
   useEffect(() => {
-    const t = setTimeout(() => router.replace('/(tabs)'), 1800);
+    const t = setTimeout(() => router.replace('/(tabs)/home'), 1800);
     return () => clearTimeout(t);
   }, []);
 

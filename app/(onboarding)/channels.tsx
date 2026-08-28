@@ -17,7 +17,7 @@ export default function Channels() {
 
   const finish = () => {
     setOnboarding({ channels: joined });
-    router.replace('/(tabs)');
+    router.replace('/(tabs)/home');
   };
 
   return (
