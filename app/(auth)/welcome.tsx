@@ -1,0 +1,75 @@
+import { Redirect, useRouter } from 'expo-router';
+import React from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Screen } from '../../components/Screen';
+import { SocialButton } from '../../components/SocialButton';
+import { ImageTile } from '../../components/ui';
+import { useAuth } from '../../context/AuthContext';
+import { colors, font, spacing } from '../../constants/theme';
+
+export default function Welcome() {
+  const router = useRouter();
+  const { isLoading, isAuthenticated, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator color={colors.ink} />
+      </View>
+    );
+  }
+
+  if (isAuthenticated && user) {
+    return (
+      <Redirect
+        href={user.onboardingComplete ? '/(tabs)/home' : '/(onboarding)/personal-info'}
+      />
+    );
+  }
+
+  return (
+    <Screen>
+      <View style={styles.header}>
+        <Text style={styles.title}>Hi there!</Text>
+        <Text style={styles.subtitle}>
+          Log in with the email and password you created, or make a new account.
+        </Text>
+      </View>
+
+      <View style={styles.hero}>
+        <ImageTile size={120} icon="shirt-outline" style={{ borderRadius: 20 }} />
+      </View>
+
+      <View style={styles.actions}>
+        <SocialButton provider="email" onPress={() => router.push('/(auth)/login-email')} />
+        <SocialButton
+          provider="facebook"
+          onPress={() => router.push('/(auth)/login-email')}
+        />
+        <SocialButton
+          provider="google"
+          onPress={() => router.push('/(auth)/login-email')}
+        />
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Don’t have an account? </Text>
+          <Pressable onPress={() => router.push('/(auth)/signup')}>
+            <Text style={styles.link}>Create an account</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.white },
+  header: { marginTop: spacing.xxxl, marginBottom: spacing.lg },
+  title: { ...font.h1, color: colors.text },
+  subtitle: { ...font.body, color: colors.textMuted, marginTop: spacing.sm, lineHeight: 21 },
+  hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  actions: { paddingBottom: spacing.xl },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.md },
+  footerText: { ...font.small, color: colors.textMuted },
+  link: { ...font.small, color: colors.ink, fontWeight: '700' },
+});
