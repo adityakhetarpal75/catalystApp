@@ -32,10 +32,17 @@ export default function CreatorCabinet() {
         </View>
 
         <View style={styles.body}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={34} color={colors.onDarkFaint} />
+          <View style={styles.avatarRow}>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={34} color={colors.onDarkFaint} />
+            </View>
+            <View style={styles.creatorBadge}>
+              <Text style={styles.creatorBadgeText}>+ Creator</Text>
+            </View>
           </View>
+
           <Text style={styles.handle}>{creator.handle}</Text>
+          <Text style={styles.match}>{creator.match}% match</Text>
 
           <View style={styles.stats}>
             <Stat value={String(creator.products)} label="Products" />
@@ -44,8 +51,8 @@ export default function CreatorCabinet() {
           </View>
 
           <View style={styles.tags}>
-            {creator.tags.map((t, i) => (
-              <View key={i} style={styles.tag}>
+            {creator.tags.map((t) => (
+              <View key={t} style={styles.tag}>
                 <Text style={styles.tagText}>{t}</Text>
               </View>
             ))}
@@ -58,13 +65,31 @@ export default function CreatorCabinet() {
           <Text style={styles.bio}>{creator.bio}</Text>
 
           <View style={styles.segment}>
-            <Pressable style={[styles.seg, tab === 'cabinet' && styles.segActive]} onPress={() => setTab('cabinet')}>
-              <Ionicons name="grid-outline" size={16} color={tab === 'cabinet' ? colors.white : colors.onDarkFaint} />
-              <Text style={[styles.segText, tab === 'cabinet' && styles.segTextActive]}>My Cabinet</Text>
+            <Pressable
+              style={[styles.seg, tab === 'cabinet' && styles.segActive]}
+              onPress={() => setTab('cabinet')}
+            >
+              <Ionicons
+                name="grid-outline"
+                size={16}
+                color={tab === 'cabinet' ? colors.white : colors.onDarkFaint}
+              />
+              <Text style={[styles.segText, tab === 'cabinet' && styles.segTextActive]}>
+                My Cabinet
+              </Text>
             </Pressable>
-            <Pressable style={[styles.seg, tab === 'videos' && styles.segActive]} onPress={() => setTab('videos')}>
-              <Ionicons name="videocam-outline" size={16} color={tab === 'videos' ? colors.white : colors.onDarkFaint} />
-              <Text style={[styles.segText, tab === 'videos' && styles.segTextActive]}>My Videos</Text>
+            <Pressable
+              style={[styles.seg, tab === 'videos' && styles.segActive]}
+              onPress={() => setTab('videos')}
+            >
+              <Ionicons
+                name="videocam-outline"
+                size={16}
+                color={tab === 'videos' ? colors.white : colors.onDarkFaint}
+              />
+              <Text style={[styles.segText, tab === 'videos' && styles.segTextActive]}>
+                My Videos
+              </Text>
             </Pressable>
           </View>
 
@@ -78,27 +103,48 @@ export default function CreatorCabinet() {
                     <Text style={styles.stepsBadgeText}>{routineSteps.length} Steps</Text>
                   </View>
                 </View>
-                <Text style={styles.routineSub}>“This is my go-to AM routine for addressing acne.”</Text>
-                <View style={styles.routineSteps}>
+                <Text style={styles.routineSub}>
+                  "This is my go-to AM routine for addressing acne."
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.routineSteps}
+                >
                   {routineSteps.map((s) => (
-                    <View key={s.step} style={styles.stepImg}>
-                      <Ionicons name="cube-outline" size={18} color={colors.onDarkFaint} />
+                    <View key={s.step} style={styles.stepWrap}>
+                      <View style={styles.stepImg}>
+                        <Ionicons name="cube-outline" size={18} color={colors.onDarkFaint} />
+                        <View style={styles.stepNum}>
+                          <Text style={styles.stepNumText}>{s.step}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.stepName} numberOfLines={2}>
+                        {s.name}
+                      </Text>
                     </View>
                   ))}
-                </View>
+                </ScrollView>
               </View>
 
               <Text style={styles.sectionTitle}>On the shelf</Text>
               <View style={styles.grid}>
                 {beautyProducts.map((p) => (
-                  <View key={p.id} style={styles.shelfCard}>
+                  <Pressable
+                    key={p.id}
+                    style={styles.shelfCard}
+                    onPress={() =>
+                      router.push({ pathname: '/discover/brand', params: { name: p.brand } })
+                    }
+                  >
                     <View style={styles.shelfImg}>
                       <Ionicons name="cube-outline" size={24} color={colors.onDarkFaint} />
                     </View>
+                    <Text style={styles.shelfBrand}>{p.brand}</Text>
                     <Text style={styles.shelfName} numberOfLines={1}>
                       {p.name}
                     </Text>
-                  </View>
+                  </Pressable>
                 ))}
               </View>
             </>
@@ -139,12 +185,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center' },
-  followBtn: { backgroundColor: colors.white, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  followBtn: {
+    backgroundColor: colors.white,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
   followingBtn: { backgroundColor: 'rgba(0,0,0,0.25)' },
   followText: { ...font.small, color: colors.ink, fontWeight: '700' },
   followingText: { color: colors.white },
   body: { paddingHorizontal: spacing.xl, marginTop: -34 },
+  avatarRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.md },
   avatar: {
     width: 72,
     height: 72,
@@ -155,39 +214,104 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  creatorBadge: {
+    backgroundColor: colors.coral,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    marginBottom: spacing.sm,
+  },
+  creatorBadgeText: { ...font.tiny, color: colors.white, fontWeight: '800' },
   handle: { ...font.h3, color: colors.onDarkText, marginTop: spacing.md },
+  match: { ...font.small, color: colors.coral, fontWeight: '700', marginTop: 2 },
   stats: { flexDirection: 'row', gap: spacing.xl, marginTop: spacing.md },
   stat: { alignItems: 'flex-start' },
   statValue: { ...font.bodyStrong, color: colors.onDarkText },
   statLabel: { ...font.tiny, color: colors.onDarkFaint, marginTop: 2 },
-  tags: { flexDirection: 'row', gap: 6, marginTop: spacing.md },
-  tag: { backgroundColor: colors.darkElevated, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 4 },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: spacing.md },
+  tag: {
+    backgroundColor: colors.darkElevated,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+  },
   tagText: { ...font.tiny, color: colors.onDarkMuted },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.md },
   location: { ...font.tiny, color: colors.onDarkMuted },
   bio: { ...font.small, color: colors.onDarkMuted, marginTop: spacing.sm, lineHeight: 19 },
-  segment: { flexDirection: 'row', backgroundColor: colors.darkSurface, borderRadius: radius.md, padding: 4, marginTop: spacing.xl },
-  seg: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: spacing.md, borderRadius: radius.sm },
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: colors.darkSurface,
+    borderRadius: radius.md,
+    padding: 4,
+    marginTop: spacing.xl,
+  },
+  seg: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+  },
   segActive: { backgroundColor: colors.coral },
   segText: { ...font.small, color: colors.onDarkFaint, fontWeight: '600' },
   segTextActive: { color: colors.white },
-  sectionTitle: { ...font.h3, color: colors.onDarkText, marginTop: spacing.xl, marginBottom: spacing.md },
-  routineCard: { backgroundColor: colors.darkSurface, borderRadius: radius.lg, padding: spacing.lg },
-  routineHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sectionTitle: {
+    ...font.h3,
+    color: colors.onDarkText,
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+  },
+  routineCard: {
+    backgroundColor: colors.darkSurface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  routineHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   routineTitle: { ...font.bodyStrong, color: colors.onDarkText },
-  stepsBadge: { backgroundColor: colors.coral, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 3 },
+  stepsBadge: {
+    backgroundColor: colors.coral,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 3,
+  },
   stepsBadgeText: { ...font.tiny, color: colors.white, fontWeight: '700' },
   routineSub: { ...font.small, color: colors.onDarkMuted, marginTop: spacing.sm },
-  routineSteps: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  routineSteps: { gap: spacing.md, marginTop: spacing.md, paddingRight: spacing.md },
+  stepWrap: { width: 72 },
   stepImg: {
-    width: 52,
-    height: 52,
+    width: 64,
+    height: 64,
     borderRadius: radius.sm,
     backgroundColor: colors.darkElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: spacing.md },
+  stepNum: {
+    position: 'absolute',
+    top: -6,
+    left: -6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.coral,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumText: { ...font.tiny, color: colors.white, fontWeight: '800' },
+  stepName: { ...font.tiny, color: colors.onDarkMuted, marginTop: 6 },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+  },
   shelfCard: { width: '48%', marginBottom: spacing.lg },
   shelfImg: {
     aspectRatio: 1,
@@ -197,7 +321,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-  shelfName: { ...font.small, color: colors.onDarkText, fontWeight: '600' },
+  shelfBrand: {
+    ...font.tiny,
+    color: colors.onDarkFaint,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  shelfName: { ...font.small, color: colors.onDarkText, fontWeight: '600', marginTop: 2 },
   videoCard: {
     width: '31%',
     aspectRatio: 0.7,
@@ -207,5 +337,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  playBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  playBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

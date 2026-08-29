@@ -344,13 +344,54 @@ export interface Creator {
 }
 
 export const creators: Creator[] = [
-  { id: 'c1', handle: '@askimlovesbeauty', match: 75, tags: ['Oily Skin', 'Tight Dresses'], products: 30, videos: 100, following: 180, location: 'New York, NY', bio: 'Stepping up my skincare game. Always on the lookout for a good eye cream.' },
-  { id: 'c2', handle: '@vintagevaultsf', match: 88, tags: ['Vintage', 'Denim'], products: 42, videos: 60, following: 240, location: 'San Francisco, CA', bio: 'Curated 90s denim & tees, dropped weekly.' },
-  { id: 'c3', handle: '@thriftwithtara', match: 81, tags: ['Sustainable', 'Neutrals'], products: 18, videos: 34, following: 120, location: 'Austin, TX', bio: 'Slow fashion advocate • she/her.' },
+  {
+    id: 'c1',
+    handle: '@sekimlovesbeauty',
+    match: 73,
+    tags: ['24', 'Oily Skin', 'Fight Oiliness'],
+    products: 16,
+    videos: 100,
+    following: 100,
+    location: 'New York, NY',
+    bio: 'Stepping up my skincare game. Always on the lookout for a good eye cream.',
+  },
+  {
+    id: 'c2',
+    handle: '@vintagevaultsf',
+    match: 88,
+    tags: ['Vintage', 'Denim'],
+    products: 42,
+    videos: 60,
+    following: 240,
+    location: 'San Francisco, CA',
+    bio: 'Curated 90s denim & tees, dropped weekly.',
+  },
+  {
+    id: 'c3',
+    handle: '@thriftwithtara',
+    match: 81,
+    tags: ['Sustainable', 'Neutrals'],
+    products: 18,
+    videos: 34,
+    following: 120,
+    location: 'Austin, TX',
+    bio: 'Slow fashion advocate • she/her.',
+  },
 ];
 
 export const brandLogos = [
-  'Dr.Jart+', 'Murad', 'AHAVA', 'TRILLY', 'SEPHORA', 'DERMA E', 'Neutrogena', 'CeraVe', 'ANDALOU',
+  'Dr.Jart+',
+  'Murad',
+  'AHAVA',
+  'TRULY',
+  'SEPHORA',
+  'DERMA-E',
+  'Neutrogena',
+  'FREEMAN',
+  'ANDALOU',
+  'CeraVe',
+  'CLINIQUE',
+  'Glamglow',
 ];
 
 export interface BeautyProduct {
@@ -359,22 +400,40 @@ export interface BeautyProduct {
   name: string;
   price: number;
   points?: number;
+  category?: string;
 }
 
 export const beautyProducts: BeautyProduct[] = [
-  { id: 'b1', brand: 'Neutrogena', name: 'Oil Free Moisture', price: 35 },
-  { id: 'b2', brand: 'Murad', name: 'Recover Color Corrector', price: 35, points: 1000 },
-  { id: 'b3', brand: 'CLINIQUE', name: 'Moisture Surge', price: 42 },
-  { id: 'b4', brand: 'Dr.Jart+', name: 'Cicapair Cream', price: 48 },
-  { id: 'b5', brand: 'AHAVA', name: 'Mineral Hand Cream', price: 22 },
-  { id: 'b6', brand: 'DERMA E', name: 'Vitamin C Serum', price: 28 },
+  { id: 'b1', brand: 'Neutrogena', name: 'Oil Free Moisture', price: 35, category: 'Moisturizer' },
+  { id: 'b2', brand: 'Murad', name: 'Recover Color Corrector', price: 35, points: 1000, category: 'Serum' },
+  { id: 'b3', brand: 'CLINIQUE', name: 'Moisture Surge', price: 42, category: 'Moisturizer' },
+  { id: 'b4', brand: 'Dr.Jart+', name: 'Cicapair Cream', price: 48, category: 'Treatment' },
+  { id: 'b5', brand: 'AHAVA', name: 'Mineral Hand Cream', price: 22, category: 'Hand' },
+  { id: 'b6', brand: 'DERMA-E', name: 'Vitamin C Serum', price: 28, category: 'Serum' },
+  { id: 'b7', brand: 'Murad', name: 'Oil Free Moisture extra', price: 48, category: 'Moisturizer' },
+  { id: 'b8', brand: 'Glamglow', name: 'Supermud Clearing Treatment', price: 59, category: 'Mask' },
 ];
 
-export const trendingCreators = ['@sakimlovesbeauty', '@glowbymaya', '@beautybymonamary', '@retro.rosa'];
+export const trendingCreators = [
+  '@sekimlovesbeauty',
+  '@glowbymaya',
+  '@beautybymonamary',
+  '@retro.rosa',
+  '@thriftwithtara',
+];
+
+export const watchVideos = [
+  { id: 'w1', handle: '@sekimlovesbeauty', title: 'AM oil-control routine' },
+  { id: 'w2', handle: '@glowbymaya', title: 'Glass skin in 5 steps' },
+  { id: 'w3', handle: '@beautybymonamary', title: 'Drugstore dupes' },
+  { id: 'w4', handle: '@retro.rosa', title: 'Vintage beauty haul' },
+  { id: 'w5', handle: '@thriftwithtara', title: 'Clean beauty swaps' },
+  { id: 'w6', handle: '@sekimlovesbeauty', title: 'Night barrier repair' },
+];
 
 export const routineSteps = [
   { step: 1, brand: 'Neutrogena', name: 'Gentle Cleanser' },
-  { step: 2, brand: 'DERMA E', name: 'Vitamin C Serum' },
+  { step: 2, brand: 'DERMA-E', name: 'Vitamin C Serum' },
   { step: 3, brand: 'Neutrogena', name: 'Oil Free Moisture' },
   { step: 4, brand: 'Murad', name: 'Invisiblur SPF 30' },
 ];

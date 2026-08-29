@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { beautyProducts } from '../../constants/data';
@@ -11,6 +11,14 @@ export default function BrandDetail() {
   const { name } = useLocalSearchParams<{ name: string }>();
   const router = useRouter();
   const brand = name || 'Murad';
+  const [following, setFollowing] = useState(false);
+
+  const products = useMemo(() => {
+    const matched = beautyProducts.filter(
+      (p) => p.brand.toLowerCase() === brand.toLowerCase()
+    );
+    return matched.length ? matched : beautyProducts;
+  }, [brand]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -23,36 +31,49 @@ export default function BrandDetail() {
             </Pressable>
             <View style={styles.bannerActions}>
               <Pressable style={styles.bannerBtn}>
-                <Ionicons name="notifications-outline" size={18} color={colors.white} />
+                <Ionicons name="search" size={18} color={colors.white} />
               </Pressable>
               <Pressable style={styles.bannerBtn}>
                 <Ionicons name="settings-outline" size={18} color={colors.white} />
               </Pressable>
             </View>
           </View>
-          <Text style={styles.brandName}>{brand}</Text>
-          <Pressable style={styles.followBtn}>
-            <Text style={styles.followText}>Follow</Text>
-          </Pressable>
+          <View style={styles.logoWrap}>
+            <View style={styles.logo}>
+              <Text style={styles.logoText}>{brand.slice(0, 1)}</Text>
+            </View>
+          </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Top Products</Text>
-        <View style={styles.grid}>
-          {beautyProducts.map((p) => (
-            <View key={p.id} style={styles.card}>
-              <View style={styles.cardImg}>
-                <Ionicons name="cube-outline" size={26} color={colors.onDarkFaint} />
+        <View style={styles.body}>
+          <Text style={styles.brandName}>{brand}</Text>
+          <Pressable
+            style={[styles.followBtn, following && styles.followingBtn]}
+            onPress={() => setFollowing((v) => !v)}
+          >
+            <Text style={[styles.followText, following && styles.followingText]}>
+              {following ? 'Following' : 'Follow'}
+            </Text>
+          </Pressable>
+
+          <Text style={styles.sectionTitle}>Top Products</Text>
+          <View style={styles.grid}>
+            {products.map((p) => (
+              <View key={p.id} style={styles.card}>
+                <View style={styles.cardImg}>
+                  <Ionicons name="cube-outline" size={26} color={colors.onDarkFaint} />
+                </View>
+                <Text style={styles.cardBrand}>{p.brand}</Text>
+                <Text style={styles.cardName} numberOfLines={2}>
+                  {p.name}
+                </Text>
+                <Text style={styles.cardPrice}>
+                  ${p.price}
+                  {p.points ? ` + ${p.points} pts` : ''}
+                </Text>
               </View>
-              <Text style={styles.cardBrand}>{p.brand}</Text>
-              <Text style={styles.cardName} numberOfLines={1}>
-                {p.name}
-              </Text>
-              <Text style={styles.cardPrice}>
-                ${p.price}
-                {p.points ? ` + ${p.points} pts` : ''}
-              </Text>
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -65,9 +86,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
-    borderBottomLeftRadius: radius.xl,
-    borderBottomRightRadius: radius.xl,
+    paddingBottom: 48,
   },
   bannerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   bannerActions: { flexDirection: 'row', gap: spacing.sm },
@@ -79,18 +98,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  brandName: { fontSize: 34, fontWeight: '900', color: colors.white, marginTop: spacing.xxl, letterSpacing: 0.5 },
+  logoWrap: { alignItems: 'center', marginTop: spacing.xxl },
+  logo: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 4,
+    borderColor: colors.dark,
+  },
+  logoText: { fontSize: 32, fontWeight: '900', color: colors.ink },
+  body: { paddingHorizontal: spacing.xl, marginTop: -28 },
+  brandName: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: colors.onDarkText,
+    textAlign: 'center',
+    marginTop: spacing.xl,
+  },
   followBtn: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     marginTop: spacing.md,
     backgroundColor: colors.white,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.sm,
   },
+  followingBtn: { backgroundColor: colors.coral },
   followText: { ...font.small, color: colors.ink, fontWeight: '700' },
-  sectionTitle: { ...font.h3, color: colors.onDarkText, paddingHorizontal: spacing.xl, marginTop: spacing.xl, marginBottom: spacing.md },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: spacing.xl },
+  followingText: { color: colors.white },
+  sectionTitle: {
+    ...font.h3,
+    color: colors.onDarkText,
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
   card: { width: '48%', marginBottom: spacing.lg },
   cardImg: {
     aspectRatio: 1,
@@ -100,7 +149,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-  cardBrand: { ...font.tiny, color: colors.onDarkFaint, fontWeight: '700', textTransform: 'uppercase' },
-  cardName: { ...font.small, color: colors.onDarkText, fontWeight: '600', marginTop: 2 },
+  cardBrand: {
+    ...font.tiny,
+    color: colors.onDarkFaint,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  cardName: { ...font.small, color: colors.onDarkText, fontWeight: '600', marginTop: 2, minHeight: 32 },
   cardPrice: { ...font.small, color: colors.onDarkMuted, marginTop: 2 },
 });
