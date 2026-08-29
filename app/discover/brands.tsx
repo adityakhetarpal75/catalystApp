@@ -44,6 +44,7 @@ export default function ExploreBrands() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <Text style={styles.sectionTitle}>Popular Brands</Text>
         <View style={styles.grid}>
           {list.map((b) => (
             <Pressable
@@ -90,6 +91,7 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, ...font.body, color: colors.onDarkText },
   scroll: { padding: spacing.xl },
+  sectionTitle: { ...font.h3, color: colors.onDarkText, marginBottom: spacing.lg },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   tile: {
     width: '31%',
