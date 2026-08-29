@@ -6,24 +6,38 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import {
+  createAccount,
+  markAccountOnboarded,
+  updateAccountPassword,
+  updateAccountProfile,
+  verifyLogin,
+  type StoredAccount,
+} from '../lib/accounts';
 import { storage } from '../lib/storage';
 
-const AUTH_KEY = 'catalyst.auth.session';
+const SESSION_KEY = 'catalyst.auth.session';
 
 export type AuthUser = {
+  id: string;
   email: string;
+  username: string;
   firstName: string;
   lastName: string;
-  /** True after completing the onboarding questionnaire */
   onboardingComplete: boolean;
 };
 
 type AuthStatus = 'loading' | 'signedOut' | 'signedIn';
 
-type PendingCredentials = {
+type PendingSignup = {
   email: string;
+  username: string;
   firstName: string;
   lastName: string;
+};
+
+type PendingLogin = {
+  login: string; // email or username
 };
 
 interface AuthContextValue {
@@ -31,48 +45,64 @@ interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  pending: PendingCredentials;
-  setPending: (p: Partial<PendingCredentials>) => void;
-  /** Sign in an existing user (login / password reset). Marks onboarding complete. */
-  signIn: (overrides?: Partial<PendingCredentials>) => Promise<void>;
-  /** Create a new account. Leaves onboarding incomplete so the questionnaire runs. */
-  signUp: (overrides?: Partial<PendingCredentials>) => Promise<void>;
-  /** Persist that the user finished onboarding. */
+  pendingSignup: PendingSignup;
+  pendingLogin: PendingLogin;
+  setPendingSignup: (p: Partial<PendingSignup>) => void;
+  setPendingLogin: (p: Partial<PendingLogin>) => void;
+  /** Validate email/username + password against the local account store. */
+  signIn: (login: string, password: string) => Promise<AuthUser>;
+  /** Create a real account with username + password, then sign in. */
+  signUp: (password: string) => Promise<AuthUser>;
+  /** Reset password for an existing account, then sign in. */
+  resetPassword: (email: string, newPassword: string) => Promise<AuthUser>;
   completeOnboarding: () => Promise<void>;
-  /** Clear the session and return to signed-out state. */
+  updateUser: (patch: Partial<Pick<AuthUser, 'firstName' | 'lastName' | 'username' | 'email'>>) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
-const emptyPending: PendingCredentials = { email: '', firstName: '', lastName: '' };
+const emptySignup: PendingSignup = { email: '', username: '', firstName: '', lastName: '' };
+const emptyLogin: PendingLogin = { login: '' };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-async function persist(user: AuthUser | null) {
-  if (user) {
-    await storage.setItem(AUTH_KEY, JSON.stringify(user));
-  } else {
-    await storage.removeItem(AUTH_KEY);
-  }
+function toAuthUser(account: StoredAccount): AuthUser {
+  return {
+    id: account.id,
+    email: account.email,
+    username: account.username,
+    firstName: account.firstName,
+    lastName: account.lastName,
+    onboardingComplete: account.onboardingComplete,
+  };
+}
+
+async function persistSession(user: AuthUser | null) {
+  if (user) await storage.setItem(SESSION_KEY, JSON.stringify(user));
+  else await storage.removeItem(SESSION_KEY);
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [pending, setPendingState] = useState<PendingCredentials>(emptyPending);
+  const [pendingSignup, setPendingSignupState] = useState<PendingSignup>(emptySignup);
+  const [pendingLogin, setPendingLoginState] = useState<PendingLogin>(emptyLogin);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const raw = await storage.getItem(AUTH_KEY);
+        const raw = await storage.getItem(SESSION_KEY);
         if (cancelled) return;
         if (raw) {
           const parsed = JSON.parse(raw) as AuthUser;
-          setUser(parsed);
-          setStatus('signedIn');
-        } else {
-          setStatus('signedOut');
+          // Require a real account id — drop legacy Julia/demo sessions
+          if (parsed?.id && parsed?.email && parsed?.username) {
+            setUser(parsed);
+            setStatus('signedIn');
+            return;
+          }
         }
+        setStatus('signedOut');
       } catch {
         if (!cancelled) setStatus('signedOut');
       }
@@ -82,60 +112,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const setPending = useCallback((p: Partial<PendingCredentials>) => {
-    setPendingState((prev) => ({ ...prev, ...p }));
+  const setPendingSignup = useCallback((p: Partial<PendingSignup>) => {
+    setPendingSignupState((prev) => ({ ...prev, ...p }));
   }, []);
 
-  const buildUser = useCallback(
-    (overrides: Partial<PendingCredentials> | undefined, onboardingComplete: boolean): AuthUser => {
-      const email = (overrides?.email ?? pending.email).trim().toLowerCase();
-      const firstName = (overrides?.firstName ?? pending.firstName).trim() || 'Julia';
-      const lastName = (overrides?.lastName ?? pending.lastName).trim() || 'Jess';
-      return {
-        email: email || 'julia@example.com',
-        firstName,
-        lastName,
-        onboardingComplete,
-      };
-    },
-    [pending]
-  );
+  const setPendingLogin = useCallback((p: Partial<PendingLogin>) => {
+    setPendingLoginState((prev) => ({ ...prev, ...p }));
+  }, []);
 
-  const signIn = useCallback(
-    async (overrides?: Partial<PendingCredentials>) => {
-      const next = buildUser(overrides, true);
-      await persist(next);
-      setUser(next);
-      setStatus('signedIn');
-      setPendingState(emptyPending);
-    },
-    [buildUser]
-  );
+  const signIn = useCallback(async (login: string, password: string) => {
+    const account = await verifyLogin(login, password);
+    const next = toAuthUser(account);
+    await persistSession(next);
+    setUser(next);
+    setStatus('signedIn');
+    setPendingLoginState(emptyLogin);
+    setPendingSignupState(emptySignup);
+    return next;
+  }, []);
 
   const signUp = useCallback(
-    async (overrides?: Partial<PendingCredentials>) => {
-      const next = buildUser(overrides, false);
-      await persist(next);
+    async (password: string) => {
+      const account = await createAccount({
+        email: pendingSignup.email,
+        username: pendingSignup.username,
+        firstName: pendingSignup.firstName,
+        lastName: pendingSignup.lastName,
+        password,
+      });
+      const next = toAuthUser(account);
+      await persistSession(next);
       setUser(next);
       setStatus('signedIn');
-      setPendingState(emptyPending);
+      setPendingSignupState(emptySignup);
+      return next;
     },
-    [buildUser]
+    [pendingSignup]
   );
+
+  const resetPassword = useCallback(async (email: string, newPassword: string) => {
+    const account = await updateAccountPassword(email, newPassword);
+    const next = toAuthUser(account);
+    await persistSession(next);
+    setUser(next);
+    setStatus('signedIn');
+    setPendingLoginState(emptyLogin);
+    return next;
+  }, []);
 
   const completeOnboarding = useCallback(async () => {
     setUser((prev) => {
       if (!prev) return prev;
       const next = { ...prev, onboardingComplete: true };
-      void persist(next);
+      void markAccountOnboarded(prev.id);
+      void persistSession(next);
       return next;
     });
   }, []);
 
+  const updateUser = useCallback(
+    async (patch: Partial<Pick<AuthUser, 'firstName' | 'lastName' | 'username' | 'email'>>) => {
+      if (!user) return;
+      const updated = await updateAccountProfile(user.id, patch);
+      if (!updated) return;
+      const next = toAuthUser(updated);
+      await persistSession(next);
+      setUser(next);
+    },
+    [user]
+  );
+
   const signOut = useCallback(async () => {
-    await persist(null);
+    await persistSession(null);
     setUser(null);
-    setPendingState(emptyPending);
+    setPendingSignupState(emptySignup);
+    setPendingLoginState(emptyLogin);
     setStatus('signedOut');
   }, []);
 
@@ -145,14 +196,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isAuthenticated: status === 'signedIn' && !!user,
       isLoading: status === 'loading',
-      pending,
-      setPending,
+      pendingSignup,
+      pendingLogin,
+      setPendingSignup,
+      setPendingLogin,
       signIn,
       signUp,
+      resetPassword,
       completeOnboarding,
+      updateUser,
       signOut,
     }),
-    [status, user, pending, setPending, signIn, signUp, completeOnboarding, signOut]
+    [
+      status,
+      user,
+      pendingSignup,
+      pendingLogin,
+      setPendingSignup,
+      setPendingLogin,
+      signIn,
+      signUp,
+      resetPassword,
+      completeOnboarding,
+      updateUser,
+      signOut,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

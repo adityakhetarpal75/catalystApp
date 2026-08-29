@@ -6,19 +6,20 @@ import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
 import { SocialButton } from '../../components/SocialButton';
-import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
+import { emailTaken, usernameTaken } from '../../lib/accounts';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function Signup() {
   const router = useRouter();
-  const { setProfile } = useApp();
-  const { setPending } = useAuth();
+  const { setPendingSignup } = useAuth();
   const [mode, setMode] = useState<'landing' | 'form'>('landing');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   if (mode === 'landing') {
     return (
@@ -27,7 +28,7 @@ export default function Signup() {
         <View style={styles.body}>
           <Text style={styles.title}>Let’s get started!</Text>
           <Text style={styles.subtitle}>
-            You can sign up with your email, Facebook or Google account.
+            Create your Catalyst account with an email, username, and password.
           </Text>
 
           <View style={{ flex: 1 }} />
@@ -47,6 +48,50 @@ export default function Signup() {
     );
   }
 
+  const onNext = async () => {
+    const trimmedEmail = email.trim();
+    const trimmedUser = username.trim().replace(/^@/, '');
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    if (trimmedUser.length < 3) {
+      setError('Username must be at least 3 characters');
+      return;
+    }
+    if (!/^[a-z0-9._]+$/i.test(trimmedUser)) {
+      setError('Username can only use letters, numbers, dots, and underscores');
+      return;
+    }
+    if (!first.trim() || !last.trim()) {
+      setError('First and last name are required');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      if (await emailTaken(trimmedEmail)) {
+        setError('An account with this email already exists. Try logging in.');
+        return;
+      }
+      if (await usernameTaken(trimmedUser)) {
+        setError('That username is already taken');
+        return;
+      }
+      setPendingSignup({
+        email: trimmedEmail,
+        username: trimmedUser,
+        firstName: first.trim(),
+        lastName: last.trim(),
+      });
+      router.push('/(auth)/signup-password');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Screen scroll>
       <Header title="Create an Account" onBack={() => setMode('landing')} />
@@ -59,32 +104,46 @@ export default function Signup() {
         placeholder="name@email.com"
         keyboardType="email-address"
         autoCapitalize="none"
+        autoCorrect={false}
         value={email}
-        onChangeText={setEmail}
-      />
-      <Input label="First Name*" placeholder="Julia" value={first} onChangeText={setFirst} />
-      <Input label="Last Name*" placeholder="Jess" value={last} onChangeText={setLast} />
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button
-        label="Next"
-        style={{ marginTop: spacing.lg }}
-        onPress={() => {
-          const trimmed = email.trim();
-          if (!trimmed || !trimmed.includes('@')) {
-            setError('Please enter a valid email address');
-            return;
-          }
-          if (!first.trim() || !last.trim()) {
-            setError('First and last name are required');
-            return;
-          }
-          setError('');
-          setPending({ email: trimmed, firstName: first.trim(), lastName: last.trim() });
-          setProfile({ firstName: first.trim(), lastName: last.trim(), email: trimmed });
-          router.push('/(auth)/signup-password');
+        onChangeText={(v) => {
+          setEmail(v);
+          if (error) setError('');
         }}
       />
+      <Input
+        label="Username*"
+        icon="at-outline"
+        placeholder="Choose a unique username"
+        autoCapitalize="none"
+        autoCorrect={false}
+        value={username}
+        onChangeText={(v) => {
+          setUsername(v);
+          if (error) setError('');
+        }}
+      />
+      <Input
+        label="First Name*"
+        placeholder="Your first name"
+        value={first}
+        onChangeText={(v) => {
+          setFirst(v);
+          if (error) setError('');
+        }}
+      />
+      <Input
+        label="Last Name*"
+        placeholder="Your last name"
+        value={last}
+        onChangeText={(v) => {
+          setLast(v);
+          if (error) setError('');
+        }}
+      />
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <Button label="Next" loading={loading} style={{ marginTop: spacing.lg }} onPress={onNext} />
     </Screen>
   );
 }

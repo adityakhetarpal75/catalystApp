@@ -10,11 +10,13 @@ import { SelectField } from '../../components/SelectField';
 import { Avatar } from '../../components/ui';
 import { cities, sizeOptions, styleOptions } from '../../constants/data';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, radius, spacing } from '../../constants/theme';
 
 export default function EditProfile() {
   const router = useRouter();
   const { profile, setProfile, sellEnabled, rentEnabled, setSellEnabled, setRentEnabled } = useApp();
+  const { updateUser } = useAuth();
 
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
@@ -28,8 +30,10 @@ export default function EditProfile() {
   const togglePersona = (key: string) =>
     setPersona((p) => (p.includes(key) ? p.filter((x) => x !== key) : [...p, key]));
 
-  const save = () => {
-    setProfile({ firstName, lastName, username, bio, location, email });
+  const save = async () => {
+    const cleanUser = username.trim().replace(/^@/, '');
+    setProfile({ firstName, lastName, username: cleanUser, bio, location, email });
+    await updateUser({ firstName, lastName, username: cleanUser, email });
     router.back();
   };
 

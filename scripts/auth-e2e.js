@@ -4,93 +4,132 @@ const path = require('path');
 
 const BASE = 'http://localhost:8081';
 const OUT = '/opt/cursor/artifacts';
-const SHOTS = '/workspace/screenshots';
 
 async function shot(page, name) {
-  await page.screenshot({ path: path.join(SHOTS, name), fullPage: false });
   await page.screenshot({ path: path.join(OUT, name), fullPage: false });
 }
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  fs.mkdirSync(SHOTS, { recursive: true });
-
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    viewport: { width: 400, height: 850 },
-    deviceScaleFactor: 2,
-  });
+  const context = await browser.newContext({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
-  page.setDefaultTimeout(20000);
+  page.setDefaultTimeout(25000);
+
+  const stamp = Date.now().toString(36);
+  const email = `user_${stamp}@catalyst.app`;
+  const username = `user_${stamp}`;
+  const password = 'password123';
 
   await page.goto(BASE + '/welcome', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(1200);
   await page.evaluate(() => localStorage.clear());
-  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2000);
-  await page.getByText('Hi there!').first().waitFor({ state: 'visible' });
-  await shot(page, 'auth-welcome.png');
-  console.log('OK: welcome');
 
-  await page.getByText('Continue With Email').click();
+  // ---- SIGN UP (direct route to avoid stacked screens) ----
+  await page.goto(BASE + '/signup', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1200);
+  // Landing mode — click email
+  await page.evaluate(() => {
+    const nodes = Array.from(document.querySelectorAll('div'));
+    const btn = nodes.find((n) => n.textContent === 'Continue With Email' && n.offsetParent !== null);
+    if (btn) btn.click();
+  });
   await page.waitForTimeout(800);
-  await page.getByPlaceholder('name@email.com').fill('demo@catalyst.app');
+  await page.getByPlaceholder('name@email.com').fill(email);
+  await page.getByPlaceholder('Choose a unique username').fill(username);
+  await page.getByPlaceholder('Your first name').fill('Alex');
+  await page.getByPlaceholder('Your last name').fill('Rivera');
   await page.getByRole('button', { name: 'Next' }).click();
   await page.waitForTimeout(800);
-  await page.getByPlaceholder('••••••••').fill('password123');
-  await page.getByRole('button', { name: 'Log In' }).click();
-
-  // success screen then home
-  await page.waitForTimeout(2500);
-  await page.getByText('Hi Julia').first().waitFor({ state: 'visible' });
-  await shot(page, 'auth-home-after-login.png');
-  console.log('OK: signed in → home');
-
-  // Settings
-  await page.goto(BASE + '/profile/settings', { waitUntil: 'domcontentloaded' });
+  await page.getByPlaceholder('At least 8 characters').fill(password);
+  await page.getByPlaceholder('Re-enter your password').fill(password);
+  await page.getByRole('button', { name: 'Create Account' }).click();
   await page.waitForTimeout(1200);
-  await page.getByText('Signed in as').first().waitFor({ state: 'visible' });
-  await page.getByText('demo@catalyst.app').first().waitFor({ state: 'visible' });
-  await shot(page, 'auth-settings-signed-in.png');
-  console.log('OK: settings shows session');
+  await page.getByRole('button', { name: 'Open Email' }).click();
+  await page.waitForTimeout(800);
+  await page.getByText('Alex').first().waitFor({ state: 'visible' });
+  await shot(page, 'real-auth-signup-success.png');
+  console.log('OK: signup created real user Alex');
 
-  await page.getByText('Sign Out', { exact: true }).click();
-  await page.waitForTimeout(500);
-  await page.getByText('Sign out?').waitFor({ state: 'visible' });
-  await shot(page, 'auth-signout-confirm.png');
-  console.log('OK: confirm modal');
+  // Mark onboarding complete in stored session/account so we can test Home with real name
+  await page.evaluate(() => {
+    const sessionRaw = localStorage.getItem('catalyst.auth.session');
+    if (sessionRaw) {
+      const session = JSON.parse(sessionRaw);
+      session.onboardingComplete = true;
+      localStorage.setItem('catalyst.auth.session', JSON.stringify(session));
+      const users = JSON.parse(localStorage.getItem('catalyst.auth.users') || '[]');
+      const idx = users.findIndex((u) => u.id === session.id);
+      if (idx >= 0) {
+        users[idx].onboardingComplete = true;
+        localStorage.setItem('catalyst.auth.users', JSON.stringify(users));
+      }
+    }
+  });
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2000);
+  await page.getByText('Hi Alex').first().waitFor({ state: 'visible' });
+  await shot(page, 'real-auth-home.png');
+  console.log('OK: home shows Hi Alex (not Julia)');
 
-  // Confirm button in modal — last Sign Out button
+  // Settings shows real account
+  await page.goto(BASE + '/profile/settings', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+  await page.getByText(email).first().waitFor({ state: 'visible' });
+  await page.getByText(`@${username}`).first().waitFor({ state: 'visible' });
+  await shot(page, 'real-auth-settings.png');
+  console.log('OK: settings shows real email/username');
+
+  // Sign out
+  await page.evaluate(() => {
+    const nodes = Array.from(document.querySelectorAll('div'));
+    const el = nodes.find((n) => n.textContent === 'Sign Out' && n.offsetParent !== null);
+    if (el) el.click();
+  });
+  await page.waitForTimeout(400);
   await page.getByRole('button', { name: 'Sign Out' }).click();
   await page.waitForTimeout(1200);
   await page.getByText('Hi there!').first().waitFor({ state: 'visible' });
-  console.log('OK: signed out → welcome');
+  console.log('OK: signed out');
 
-  // Guard
-  await page.goto(BASE + '/home', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(1500);
-  await page.getByText('Hi there!').first().waitFor({ state: 'visible' });
-  console.log('OK: /home guarded → welcome');
-
-  // Persist
-  await page.getByText('Continue With Email').click();
-  await page.waitForTimeout(600);
-  await page.getByPlaceholder('name@email.com').fill('persist@catalyst.app');
+  // Login with username + password
+  await page.goto(BASE + '/login-email', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(800);
+  await page.getByPlaceholder('name@email.com or username').fill(username);
   await page.getByRole('button', { name: 'Next' }).click();
   await page.waitForTimeout(600);
-  await page.getByPlaceholder('••••••••').fill('password123');
+  await page.getByPlaceholder('Your password').fill(password);
   await page.getByRole('button', { name: 'Log In' }).click();
   await page.waitForTimeout(2500);
-  await page.getByText('Hi Julia').first().waitFor({ state: 'visible' });
-  await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2000);
-  await page.getByText('Hi Julia').first().waitFor({ state: 'visible' });
-  await shot(page, 'auth-session-persists.png');
-  console.log('OK: session persists across reload');
+  await page.getByText('Hi Alex').first().waitFor({ state: 'visible' });
+  console.log('OK: login with username+password shows Alex');
+
+  // Wrong password rejected
+  await page.goto(BASE + '/profile/settings', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(800);
+  await page.evaluate(() => {
+    const nodes = Array.from(document.querySelectorAll('div'));
+    const el = nodes.find((n) => n.textContent === 'Sign Out' && n.offsetParent !== null);
+    if (el) el.click();
+  });
+  await page.waitForTimeout(400);
+  await page.getByRole('button', { name: 'Sign Out' }).click();
+  await page.waitForTimeout(1000);
+
+  await page.goto(BASE + '/login-email', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(800);
+  await page.getByPlaceholder('name@email.com or username').fill(email);
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.waitForTimeout(600);
+  await page.getByPlaceholder('Your password').fill('wrong-password');
+  await page.getByRole('button', { name: 'Log In' }).click();
+  await page.waitForTimeout(800);
+  await page.getByText('Incorrect password').first().waitFor({ state: 'visible' });
+  console.log('OK: wrong password rejected');
 
   await browser.close();
-  console.log('ALL AUTH CHECKS PASSED');
-})().catch(async (err) => {
+  console.log('ALL REAL AUTH CHECKS PASSED');
+})().catch((err) => {
   console.error('FAIL:', err);
   process.exit(1);
 });

@@ -7,6 +7,7 @@ import { ProductCard } from '../../components/ProductCard';
 import { Avatar, SectionTitle } from '../../components/ui';
 import { closetItems, thrifters } from '../../constants/data';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, radius, spacing } from '../../constants/theme';
 
 const categories = ['All', 'Dresses', 'Denim', 'Vintage', 'Outerwear', 'Shoes', 'Bags'];
@@ -14,6 +15,7 @@ const categories = ['All', 'Dresses', 'Denim', 'Vintage', 'Outerwear', 'Shoes', 
 export default function Home() {
   const router = useRouter();
   const { profile, wishlist, toggleWishlist } = useApp();
+  const { user } = useAuth();
   const recommended = closetItems.slice(0, 6);
   const trending = closetItems.slice(2, 8);
 
@@ -21,7 +23,7 @@ export default function Home() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.topBar}>
         <View>
-          <Text style={styles.hello}>Hi {profile.firstName} 👋</Text>
+          <Text style={styles.hello}>Hi {profile.firstName || user?.firstName || 'there'} 👋</Text>
           <Text style={styles.subHello}>Find your next favourite piece</Text>
         </View>
         <Pressable style={styles.bell}>

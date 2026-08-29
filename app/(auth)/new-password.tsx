@@ -5,14 +5,12 @@ import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
-import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function NewPassword() {
   const router = useRouter();
-  const { pending, signIn } = useAuth();
-  const { setProfile } = useApp();
+  const { pendingLogin, resetPassword } = useAuth();
   const [pw, setPw] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,15 +25,17 @@ export default function NewPassword() {
       setError('Passwords do not match');
       return;
     }
+    if (!pendingLogin.login) {
+      setError('Go back and enter your account email');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
-      const email = pending.email || 'julia@example.com';
-      await signIn({ email });
-      setProfile({ email });
+      await resetPassword(pendingLogin.login, pw);
       router.replace('/(auth)/login-success');
-    } catch {
-      setError('Unable to reset password. Please try again.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unable to reset password');
     } finally {
       setLoading(false);
     }

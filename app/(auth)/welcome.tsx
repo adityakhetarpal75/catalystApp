@@ -1,18 +1,15 @@
 import { Redirect, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../../components/Screen';
 import { SocialButton } from '../../components/SocialButton';
 import { ImageTile } from '../../components/ui';
-import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function Welcome() {
   const router = useRouter();
-  const { isLoading, isAuthenticated, user, signIn, setPending } = useAuth();
-  const { setProfile } = useApp();
-  const [busy, setBusy] = useState(false);
+  const { isLoading, isAuthenticated, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -30,36 +27,12 @@ export default function Welcome() {
     );
   }
 
-  const socialLogin = async (provider: 'facebook' | 'google') => {
-    setBusy(true);
-    try {
-      setPending({
-        email: `${provider}@catalyst.app`,
-        firstName: 'Julia',
-        lastName: 'Jess',
-      });
-      await signIn({
-        email: `${provider}@catalyst.app`,
-        firstName: 'Julia',
-        lastName: 'Jess',
-      });
-      setProfile({
-        email: `${provider}@catalyst.app`,
-        firstName: 'Julia',
-        lastName: 'Jess',
-      });
-      router.replace('/(auth)/login-success');
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <Screen>
       <View style={styles.header}>
         <Text style={styles.title}>Hi there!</Text>
         <Text style={styles.subtitle}>
-          You can log in with your email, Facebook or Google account.
+          Log in with the email and password you created, or make a new account.
         </Text>
       </View>
 
@@ -69,9 +42,14 @@ export default function Welcome() {
 
       <View style={styles.actions}>
         <SocialButton provider="email" onPress={() => router.push('/(auth)/login-email')} />
-        <SocialButton provider="facebook" onPress={() => socialLogin('facebook')} />
-        <SocialButton provider="google" onPress={() => socialLogin('google')} />
-        {busy ? <ActivityIndicator style={{ marginTop: spacing.sm }} color={colors.ink} /> : null}
+        <SocialButton
+          provider="facebook"
+          onPress={() => router.push('/(auth)/login-email')}
+        />
+        <SocialButton
+          provider="google"
+          onPress={() => router.push('/(auth)/login-email')}
+        />
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don’t have an account? </Text>

@@ -10,9 +10,11 @@ import { colors, font, spacing } from '../../constants/theme';
 export default function CheckEmail() {
   const router = useRouter();
   const { flow } = useLocalSearchParams<{ flow?: string }>();
-  const { pending, user } = useAuth();
+  const { pendingSignup, pendingLogin, user } = useAuth();
   const isSignup = flow === 'signup';
-  const email = user?.email || pending.email || 'email@example.com';
+  const email = isSignup
+    ? user?.email || pendingSignup.email || 'your email'
+    : pendingLogin.login || user?.email || 'your email';
 
   return (
     <Screen padded={false}>

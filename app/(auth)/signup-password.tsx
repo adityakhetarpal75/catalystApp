@@ -10,13 +10,17 @@ import { colors, font, spacing } from '../../constants/theme';
 
 export default function SignupPassword() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { pendingSignup, signUp } = useAuth();
   const [pw, setPw] = useState('');
   const [repeat, setRepeat] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const onNext = async () => {
+    if (!pendingSignup.email || !pendingSignup.username) {
+      setError('Go back and fill in your account details');
+      return;
+    }
     if (pw.length < 8) {
       setError('Password must be at least 8 characters');
       return;
@@ -28,10 +32,10 @@ export default function SignupPassword() {
     setError('');
     setLoading(true);
     try {
-      await signUp();
+      await signUp(pw);
       router.push({ pathname: '/(auth)/check-email', params: { flow: 'signup' } });
-    } catch {
-      setError('Unable to create account. Please try again.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unable to create account');
     } finally {
       setLoading(false);
     }
@@ -42,12 +46,15 @@ export default function SignupPassword() {
       <Header title="Create an Account" />
       <View style={styles.body}>
         <Text style={styles.title}>Create password</Text>
-        <Text style={styles.subtitle}>Create a strong password with at least 8 characters</Text>
+        <Text style={styles.subtitle}>
+          Create a strong password with at least 8 characters
+          {pendingSignup.username ? ` for @${pendingSignup.username}` : ''}
+        </Text>
 
         <Input
           label="Password"
           icon="lock-closed-outline"
-          placeholder="••••••••"
+          placeholder="At least 8 characters"
           secureTextEntry
           value={pw}
           onChangeText={(v) => {
@@ -58,7 +65,7 @@ export default function SignupPassword() {
         <Input
           label="Repeat Password"
           icon="lock-closed-outline"
-          placeholder="••••••••"
+          placeholder="Re-enter your password"
           secureTextEntry
           value={repeat}
           onChangeText={(v) => {
@@ -68,7 +75,7 @@ export default function SignupPassword() {
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Button label="Next" loading={loading} onPress={onNext} />
+        <Button label="Create Account" loading={loading} onPress={onNext} />
         <Text style={styles.terms}>
           By creating an account you agree to our{' '}
           <Text style={styles.link}>Terms & Conditions</Text>

@@ -24,7 +24,7 @@ export default function LoginSuccess() {
       <View style={styles.decorBottom} />
       <View style={styles.center}>
         <Text style={styles.wave}>👋</Text>
-        <Text style={styles.name}>{user?.firstName || 'Julia'}</Text>
+        <Text style={styles.name}>{user?.firstName || user?.username || 'there'}</Text>
         <Text style={styles.sub}>Welcome back!</Text>
       </View>
     </SafeAreaView>

@@ -37,7 +37,7 @@ export default function Settings() {
             <Text style={styles.accountLabel}>Signed in as</Text>
             <Text style={styles.accountEmail}>{user.email}</Text>
             <Text style={styles.accountName}>
-              {user.firstName} {user.lastName}
+              @{user.username} · {user.firstName} {user.lastName}
             </Text>
           </View>
         ) : null}

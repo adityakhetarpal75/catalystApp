@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { circles as seedCircles, ClosetItem, closetItems as seedItems } from '../constants/data';
+import { useAuth } from './AuthContext';
 
 interface Profile {
   firstName: string;
@@ -41,17 +42,38 @@ interface AppState {
   markChannelsIntroSeen: () => void;
 }
 
+const emptyProfile: Profile = {
+  firstName: '',
+  lastName: '',
+  username: '',
+  bio: '',
+  location: '',
+  email: '',
+};
+
 const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfileState] = useState<Profile>({
-    firstName: 'Julia',
-    lastName: 'Jess',
-    username: 'Zara',
-    bio: 'Vintage lover • thrifting since 2015 • sustainable style advocate.',
-    location: 'San Francisco, CA',
-    email: 'julia@example.com',
-  });
+  const { user } = useAuth();
+  const [profile, setProfileState] = useState<Profile>(emptyProfile);
+
+  // Keep profile in sync with the real signed-in account
+  useEffect(() => {
+    if (!user) {
+      setProfileState(emptyProfile);
+      return;
+    }
+    setProfileState((prev) => ({
+      ...prev,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
+      // Keep bio/location if already set during onboarding; seed defaults only when empty
+      bio: prev.bio || '',
+      location: prev.location || '',
+    }));
+  }, [user?.id, user?.firstName, user?.lastName, user?.username, user?.email]);
 
   const [onboarding, setOnboardingState] = useState<OnboardingState>({
     identities: [],

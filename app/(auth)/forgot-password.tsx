@@ -6,23 +6,35 @@ import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
 import { useAuth } from '../../context/AuthContext';
+import { findAccountByEmailOrUsername } from '../../lib/accounts';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function ForgotPassword() {
   const router = useRouter();
-  const { setPending } = useAuth();
+  const { setPendingLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const onReset = () => {
+  const onReset = async () => {
     const trimmed = email.trim();
     if (!trimmed || !trimmed.includes('@')) {
-      setError('Please enter a valid email address');
+      setError('Please enter the email for your account');
       return;
     }
     setError('');
-    setPending({ email: trimmed });
-    router.push('/(auth)/check-email');
+    setLoading(true);
+    try {
+      const account = await findAccountByEmailOrUsername(trimmed);
+      if (!account) {
+        setError('No account found with that email. Create an account first.');
+        return;
+      }
+      setPendingLogin({ login: account.email });
+      router.push('/(auth)/check-email');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,7 +59,7 @@ export default function ForgotPassword() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={{ flex: 1 }} />
-        <Button label="Reset Password" onPress={onReset} />
+        <Button label="Reset Password" loading={loading} onPress={onReset} />
       </View>
     </Screen>
   );

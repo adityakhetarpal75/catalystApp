@@ -5,34 +5,32 @@ import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
-import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function LoginPassword() {
   const router = useRouter();
-  const { pending, signIn } = useAuth();
-  const { setProfile } = useApp();
+  const { pendingLogin, signIn } = useAuth();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const onLogin = async () => {
-    if (password.length < 1) {
+    if (!pendingLogin.login) {
+      setError('Go back and enter your email or username');
+      return;
+    }
+    if (!password) {
       setError('Please enter your password');
       return;
     }
     setError('');
     setLoading(true);
     try {
-      const email = pending.email || 'julia@example.com';
-      const firstName = pending.firstName || 'Julia';
-      const lastName = pending.lastName || 'Jess';
-      await signIn({ email, firstName, lastName });
-      setProfile({ email, firstName, lastName });
+      await signIn(pendingLogin.login, password);
       router.replace('/(auth)/login-success');
-    } catch {
-      setError('Unable to sign in. Please try again.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unable to sign in');
     } finally {
       setLoading(false);
     }
@@ -44,14 +42,14 @@ export default function LoginPassword() {
       <View style={styles.body}>
         <Text style={styles.title}>Welcome back!</Text>
         <Text style={styles.subtitle}>Please enter your password</Text>
-        {pending.email ? (
-          <Text style={styles.emailHint}>Signing in as {pending.email}</Text>
+        {pendingLogin.login ? (
+          <Text style={styles.emailHint}>Signing in as {pendingLogin.login}</Text>
         ) : null}
 
         <Input
           label="Password"
           icon="lock-closed-outline"
-          placeholder="••••••••"
+          placeholder="Your password"
           secureTextEntry
           value={password}
           onChangeText={(v) => {

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
@@ -8,15 +8,21 @@ import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
 import { SelectField } from '../../components/SelectField';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { cities } from '../../constants/data';
 import { colors, font, radius, spacing } from '../../constants/theme';
 
 export default function PersonalInfo() {
   const router = useRouter();
   const { profile, setProfile } = useApp();
-  const [username, setUsername] = useState(profile.username);
+  const { user, updateUser } = useAuth();
+  const [username, setUsername] = useState(user?.username || profile.username);
   const [bio, setBio] = useState(profile.bio);
-  const [location, setLocation] = useState(profile.location);
+  const [location, setLocation] = useState(profile.location || '');
+
+  useEffect(() => {
+    if (user?.username && !username) setUsername(user.username);
+  }, [user?.username]);
 
   const canContinue = username.trim().length > 0 && location.trim().length > 0;
 
@@ -35,6 +41,12 @@ export default function PersonalInfo() {
         <Text style={styles.photoLabel}>Share your favourite profile photo</Text>
       </Pressable>
 
+      {user ? (
+        <Text style={styles.accountHint}>
+          Signed up as {user.firstName} {user.lastName} · {user.email}
+        </Text>
+      ) : null}
+
       <Input
         label="User Name*"
         placeholder="This is how you appear in Catalyst"
@@ -52,7 +64,6 @@ export default function PersonalInfo() {
         onChangeText={setBio}
         multiline
       />
-
       <View style={{ height: spacing.lg }} />
       <SelectField
         label="Location*"
@@ -66,8 +77,10 @@ export default function PersonalInfo() {
         label="Continue"
         disabled={!canContinue}
         style={{ marginTop: spacing.md }}
-        onPress={() => {
-          setProfile({ username, bio, location });
+        onPress={async () => {
+          const clean = username.trim().replace(/^@/, '');
+          setProfile({ username: clean, bio, location });
+          await updateUser({ username: clean });
           router.push('/(onboarding)/community');
         }}
       />
@@ -77,7 +90,8 @@ export default function PersonalInfo() {
 
 const styles = StyleSheet.create({
   title: { ...font.h1, color: colors.text, marginTop: spacing.md },
-  subtitle: { ...font.body, color: colors.textMuted, marginTop: spacing.sm, lineHeight: 21, marginBottom: spacing.xl },
+  subtitle: { ...font.body, color: colors.textMuted, marginTop: spacing.sm, lineHeight: 21, marginBottom: spacing.lg },
+  accountHint: { ...font.small, color: colors.textMuted, marginBottom: spacing.lg },
   photo: { alignItems: 'center', marginBottom: spacing.xl },
   photoCircle: {
     width: 84,

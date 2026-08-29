@@ -10,18 +10,18 @@ import { colors, font, spacing } from '../../constants/theme';
 
 export default function LoginEmail() {
   const router = useRouter();
-  const { pending, setPending } = useAuth();
-  const [email, setEmail] = useState(pending.email);
+  const { pendingLogin, setPendingLogin } = useAuth();
+  const [login, setLogin] = useState(pendingLogin.login);
   const [error, setError] = useState('');
 
   const onNext = () => {
-    const trimmed = email.trim();
-    if (!trimmed || !trimmed.includes('@')) {
-      setError('Please enter a valid email address');
+    const trimmed = login.trim();
+    if (!trimmed) {
+      setError('Enter your email or username');
       return;
     }
     setError('');
-    setPending({ email: trimmed });
+    setPendingLogin({ login: trimmed });
     router.push('/(auth)/login-password');
   };
 
@@ -30,18 +30,17 @@ export default function LoginEmail() {
       <Header title="Log in" />
       <View style={styles.body}>
         <Text style={styles.title}>Welcome back!</Text>
-        <Text style={styles.subtitle}>Log in with your email</Text>
+        <Text style={styles.subtitle}>Log in with your email or username</Text>
 
         <Input
-          label="Email Account"
-          icon="mail-outline"
-          placeholder="name@email.com"
-          keyboardType="email-address"
+          label="Email or Username"
+          icon="person-outline"
+          placeholder="name@email.com or username"
           autoCapitalize="none"
           autoCorrect={false}
-          value={email}
+          value={login}
           onChangeText={(v) => {
-            setEmail(v);
+            setLogin(v);
             if (error) setError('');
           }}
         />
