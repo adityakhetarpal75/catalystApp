@@ -29,7 +29,10 @@ export default function PersonalInfo() {
   return (
     <Screen scroll>
       <Header showBack={false} title="" />
-      <Text style={styles.title}>Tell us about yourself! 👧🏻👧🏻👧🏻</Text>
+      <Text style={styles.title}>
+        Tell us about yourself!{' '}
+        <Text style={styles.emoji}>👧🏻👧🏻👧🏻</Text>
+      </Text>
       <Text style={styles.subtitle}>
         In less than 5 minutes, you can be matched with closets and people that fit your profile.
       </Text>
@@ -86,6 +89,7 @@ export default function PersonalInfo() {
 
 const styles = StyleSheet.create({
   title: { ...font.h1, color: colors.text, marginTop: spacing.sm, lineHeight: 34 },
+  emoji: { fontSize: 26, fontWeight: '400' },
   subtitle: {
     ...font.body,
     color: colors.textMuted,

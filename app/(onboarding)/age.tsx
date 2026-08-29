@@ -32,7 +32,7 @@ export default function Age() {
     <OnboardingScaffold
       step={2}
       total={8}
-      title="What’s your age?"
+      title="What's your age?"
       subtitle="Pick your birth date!"
       nextDisabled={!month || !day || !year}
       onNext={() => {
