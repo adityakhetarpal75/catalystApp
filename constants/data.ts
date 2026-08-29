@@ -9,7 +9,6 @@ export const identityOptions = [
   'Pacific Islander',
   'South Asian',
   'White',
-  'Prefer not to say',
 ];
 
 export const styleOptions = [
@@ -17,8 +16,6 @@ export const styleOptions = [
   { key: 'quirky', label: 'Quirky' },
   { key: 'retro', label: 'Retro' },
   { key: 'basics', label: 'Basics Gal' },
-  { key: 'street', label: 'Streetwear' },
-  { key: 'minimal', label: 'Minimalist' },
 ];
 
 export const thriftingGoals = [
@@ -74,7 +71,7 @@ export interface Thrifter {
 }
 
 export const thrifters: Thrifter[] = [
-  { handle: '@beautybymonamary', bio: 'makeup & skincare • licensed cosmetologist', match: 92 },
+  { handle: '@beautybymonamary', bio: 'makeup & skincare _ Licensed cosmetologist', match: 50 },
   { handle: '@vintagevaultsf', bio: 'curated 90s denim & tees', match: 88 },
   { handle: '@thriftwithtara', bio: 'sustainable style • she/her', match: 81 },
   { handle: '@retro.rosa', bio: 'one-of-a-kind finds daily', match: 76 },
@@ -82,10 +79,10 @@ export const thrifters: Thrifter[] = [
 ];
 
 export const channels = [
+  { name: '#beautybuffs', desc: 'makeup & skincare _ Licensed cosmetologist' },
   { name: '#vintagedenim', desc: 'All things worn-in blue jeans & jackets' },
   { name: '#sustainablestyle', desc: 'Slow fashion tips & swaps' },
   { name: '#sneakerheads', desc: 'Rare kicks, trades & fits' },
-  { name: '#beautybuffs', desc: 'Makeup, skincare & self-care' },
   { name: '#sfthrifters', desc: 'Local meetups in the Bay Area' },
 ];
 

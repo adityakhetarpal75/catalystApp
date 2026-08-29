@@ -7,18 +7,22 @@ interface ChipProps {
   label: string;
   selected?: boolean;
   onPress?: () => void;
+  /** Full-width stacked pills (Figma thrifting goals) */
+  block?: boolean;
 }
 
-export function Chip({ label, selected, onPress }: ChipProps) {
+export function Chip({ label, selected, onPress, block }: ChipProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, selected && styles.chipSelected]}
+      style={[styles.chip, block && styles.block, selected && styles.chipSelected]}
       accessibilityRole="button"
     >
       {selected ? (
-        <Ionicons name="checkmark-circle" size={16} color={colors.white} style={styles.icon} />
-      ) : null}
+        <Ionicons name="checkmark" size={16} color={colors.white} style={styles.icon} />
+      ) : (
+        <Ionicons name="ellipse-outline" size={16} color={colors.borderStrong} style={styles.icon} />
+      )}
       <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
     </Pressable>
   );
@@ -30,7 +34,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.borderStrong,
@@ -38,8 +42,13 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     marginBottom: spacing.sm,
   },
+  block: {
+    alignSelf: 'stretch',
+    marginRight: 0,
+    borderRadius: radius.lg,
+  },
   chipSelected: { backgroundColor: colors.ink, borderColor: colors.ink },
-  icon: { marginRight: 6 },
-  label: { ...font.small, color: colors.text, fontWeight: '500' },
+  icon: { marginRight: spacing.sm },
+  label: { ...font.body, color: colors.text, fontWeight: '500', flexShrink: 1 },
   labelSelected: { color: colors.white, fontWeight: '600' },
 });

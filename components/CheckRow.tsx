@@ -33,11 +33,12 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.md + 2,
     marginBottom: spacing.sm,
     backgroundColor: colors.white,
   },
-  rowChecked: { borderColor: colors.ink, backgroundColor: '#FAFAFA' },
+  // Figma selected state: soft slate fill
+  rowChecked: { borderColor: '#C5CDD6', backgroundColor: '#E8EEF2' },
   box: {
     width: 20,
     height: 20,

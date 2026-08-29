@@ -9,7 +9,7 @@ import { useApp } from '../../context/AppContext';
 export default function Goals() {
   const router = useRouter();
   const { setOnboarding } = useApp();
-  const [selected, setSelected] = useState<string[]>(['Find a costume']);
+  const [selected, setSelected] = useState<string[]>([]);
 
   const toggle = (g: string) =>
     setSelected((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]));
@@ -25,9 +25,15 @@ export default function Goals() {
         router.push('/(onboarding)/sizes');
       }}
     >
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+      <View>
         {thriftingGoals.map((g) => (
-          <Chip key={g} label={g} selected={selected.includes(g)} onPress={() => toggle(g)} />
+          <Chip
+            key={g}
+            block
+            label={g}
+            selected={selected.includes(g)}
+            onPress={() => toggle(g)}
+          />
         ))}
       </View>
     </OnboardingScaffold>

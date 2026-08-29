@@ -37,7 +37,7 @@ export default function Brands() {
               {active ? (
                 <Ionicons name="checkmark-circle" size={22} color={colors.ink} style={styles.check} />
               ) : null}
-              <Ionicons name="pricetag-outline" size={20} color={colors.textFaint} />
+              <Ionicons name="image-outline" size={28} color={colors.textFaint} />
               <Text style={styles.label} numberOfLines={1}>
                 {b}
               </Text>

@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -28,21 +27,18 @@ export default function Channels() {
       step={8}
       total={8}
       title="Join channels"
-      subtitle="Join our curated channels to hang out with community and chat about thrifting."
+      subtitle="Join our curated channels to hang out with community and chat about beauty"
       showSkip
       onSkip={finish}
       onNext={finish}
-      nextLabel="Finish"
+      nextLabel="Next"
     >
       {channels.map((c) => {
         const isJoined = joined.includes(c.name);
         return (
           <View key={c.name} style={styles.row}>
-            <View style={styles.iconWrap}>
-              <Ionicons name="chatbubbles-outline" size={20} color={colors.textMuted} />
-            </View>
             <View style={styles.info}>
-              <Text style={styles.name}>{c.name}</Text>
+              <Text style={styles.name}>{c.name.toUpperCase()}</Text>
               <Text style={styles.desc} numberOfLines={1}>
                 {c.desc}
               </Text>
@@ -67,28 +63,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
   },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.fill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  info: { flex: 1, marginLeft: spacing.md },
-  name: { ...font.bodyStrong, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.3 },
+  info: { flex: 1, marginRight: spacing.md },
+  name: { ...font.bodyStrong, color: colors.text, letterSpacing: 0.3 },
   desc: { ...font.tiny, color: colors.textMuted, marginTop: 2 },
   joinBtn: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.ink,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: radius.sm,
+    backgroundColor: colors.ink,
+    minWidth: 78,
+    alignItems: 'center',
   },
-  joinedBtn: { backgroundColor: colors.ink },
-  joinText: { ...font.small, color: colors.ink, fontWeight: '700' },
-  joinedText: { color: colors.white },
+  joinedBtn: { backgroundColor: colors.fill },
+  joinText: { ...font.small, color: colors.white, fontWeight: '700' },
+  joinedText: { color: colors.text },
 });

@@ -16,8 +16,8 @@ export default function PersonalInfo() {
   const router = useRouter();
   const { profile, setProfile } = useApp();
   const { user, updateUser } = useAuth();
-  const [username, setUsername] = useState(user?.username || profile.username);
-  const [bio, setBio] = useState(profile.bio);
+  const [username, setUsername] = useState(user?.username || profile.username || '');
+  const [bio, setBio] = useState(profile.bio || '');
   const [location, setLocation] = useState(profile.location || '');
 
   useEffect(() => {
@@ -28,24 +28,18 @@ export default function PersonalInfo() {
 
   return (
     <Screen scroll>
-      <Header title="Personal Information" />
-      <Text style={styles.title}>Tell us about yourself!</Text>
+      <Header showBack={false} title="" />
+      <Text style={styles.title}>Tell us about yourself! 👧🏻👧🏻👧🏻</Text>
       <Text style={styles.subtitle}>
         In less than 5 minutes, you can be matched with closets and people that fit your profile.
       </Text>
 
       <Pressable style={styles.photo}>
         <View style={styles.photoCircle}>
-          <Ionicons name="camera-outline" size={26} color={colors.textMuted} />
+          <Ionicons name="camera" size={28} color={colors.textMuted} />
         </View>
         <Text style={styles.photoLabel}>Share your favourite profile photo</Text>
       </Pressable>
-
-      {user ? (
-        <Text style={styles.accountHint}>
-          Signed up as {user.firstName} {user.lastName} · {user.email}
-        </Text>
-      ) : null}
 
       <Input
         label="User Name*"
@@ -53,6 +47,7 @@ export default function PersonalInfo() {
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
+        autoCorrect={false}
       />
 
       <Text style={styles.fieldLabel}>Bio</Text>
@@ -65,6 +60,7 @@ export default function PersonalInfo() {
         multiline
       />
       <View style={{ height: spacing.lg }} />
+
       <SelectField
         label="Location*"
         placeholder="Selection"
@@ -76,7 +72,7 @@ export default function PersonalInfo() {
       <Button
         label="Continue"
         disabled={!canContinue}
-        style={{ marginTop: spacing.md }}
+        style={{ marginTop: spacing.md, marginBottom: spacing.xl }}
         onPress={async () => {
           const clean = username.trim().replace(/^@/, '');
           setProfile({ username: clean, bio, location });
@@ -89,14 +85,19 @@ export default function PersonalInfo() {
 }
 
 const styles = StyleSheet.create({
-  title: { ...font.h1, color: colors.text, marginTop: spacing.md },
-  subtitle: { ...font.body, color: colors.textMuted, marginTop: spacing.sm, lineHeight: 21, marginBottom: spacing.lg },
-  accountHint: { ...font.small, color: colors.textMuted, marginBottom: spacing.lg },
+  title: { ...font.h1, color: colors.text, marginTop: spacing.sm, lineHeight: 34 },
+  subtitle: {
+    ...font.body,
+    color: colors.textMuted,
+    marginTop: spacing.sm,
+    lineHeight: 21,
+    marginBottom: spacing.xl,
+  },
   photo: { alignItems: 'center', marginBottom: spacing.xl },
   photoCircle: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     backgroundColor: colors.fill,
     alignItems: 'center',
     justifyContent: 'center',
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.md,
     padding: spacing.md,
-    minHeight: 90,
+    minHeight: 100,
     textAlignVertical: 'top',
     ...font.body,
     color: colors.text,

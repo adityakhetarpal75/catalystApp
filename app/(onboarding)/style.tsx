@@ -33,12 +33,14 @@ export default function StyleStep() {
               style={[styles.tile, active && styles.tileActive]}
               onPress={() => setSelected(opt.key)}
             >
-              <View style={styles.imageWell}>
-                <Ionicons
-                  name={active ? 'checkmark-circle' : 'shirt-outline'}
-                  size={active ? 34 : 26}
-                  color={active ? colors.ink : colors.textFaint}
-                />
+              <View style={[styles.imageWell, active && styles.imageWellActive]}>
+                {active ? (
+                  <View style={styles.checkBadge}>
+                    <Ionicons name="checkmark" size={28} color={colors.white} />
+                  </View>
+                ) : (
+                  <Ionicons name="image-outline" size={28} color={colors.textFaint} />
+                )}
               </View>
               <Text style={styles.label}>{opt.label}</Text>
             </Pressable>
@@ -51,23 +53,29 @@ export default function StyleStep() {
 
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  tile: {
-    width: '48%',
+  tile: { width: '48%', marginBottom: spacing.lg },
+  tileActive: {},
+  imageWell: {
+    aspectRatio: 1,
+    borderRadius: radius.md,
+    backgroundColor: colors.fill,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    backgroundColor: colors.white,
-  },
-  tileActive: { borderColor: colors.ink, backgroundColor: '#FAFAFA' },
-  imageWell: {
-    height: 90,
-    borderRadius: radius.sm,
-    backgroundColor: colors.fill,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
+  },
+  imageWellActive: {
+    backgroundColor: '#C5CDD6',
+    borderColor: '#C5CDD6',
+  },
+  checkBadge: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: { ...font.small, color: colors.text, fontWeight: '600', textAlign: 'center' },
 });
