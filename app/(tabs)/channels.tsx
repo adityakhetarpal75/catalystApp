@@ -53,15 +53,15 @@ export default function Channels() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Pressable onPress={() => setShowPanel(true)} hitSlop={10}>
+        <Pressable testID="circles-menu" onPress={() => setShowPanel(true)} hitSlop={10}>
           <Ionicons name="menu" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.title}>Feed</Text>
         <View style={styles.headerRight}>
-          <Pressable onPress={() => setShowSort(true)} hitSlop={10}>
+          <Pressable testID="circles-sort" onPress={() => setShowSort(true)} hitSlop={10}>
             <Ionicons name="funnel-outline" size={22} color={colors.text} />
           </Pressable>
-          <Pressable onPress={() => router.push('/circles/explore')} hitSlop={10}>
+          <Pressable testID="circles-search" onPress={() => router.push('/circles/explore')} hitSlop={10}>
             <Ionicons name="search" size={22} color={colors.text} />
           </Pressable>
         </View>

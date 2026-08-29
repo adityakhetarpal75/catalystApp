@@ -17,7 +17,7 @@ export default function Follow() {
 
   const next = () => {
     setOnboarding({ following });
-    router.push('/(onboarding)/channels');
+    router.push('/(onboarding)/join-channels');
   };
 
   return (
