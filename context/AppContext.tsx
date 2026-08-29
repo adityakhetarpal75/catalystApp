@@ -5,8 +5,12 @@ import {
   closetItems as seedItems,
   Look,
   looks as seedLooks,
+  Post,
+  posts as seedPosts,
 } from '../constants/data';
 import { useAuth } from './AuthContext';
+
+export type ComposeProduct = { id: string; brand: string; name: string };
 
 interface Profile {
   firstName: string;
@@ -51,6 +55,13 @@ interface AppState {
   markChannelsIntroSeen: () => void;
   closetIntroSeen: boolean;
   markClosetIntroSeen: () => void;
+  feedPosts: Post[];
+  addFeedPost: (post: Post) => void;
+  addReply: (postId: string, reply: Post['replies'][number]) => void;
+  composeProducts: ComposeProduct[];
+  setComposeProducts: (products: ComposeProduct[]) => void;
+  removeComposeProduct: (id: string) => void;
+  clearComposeProducts: () => void;
 }
 
 const emptyProfile: Profile = {
@@ -103,6 +114,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
   const [channelsIntroSeen, setChannelsIntroSeen] = useState(false);
   const [closetIntroSeen, setClosetIntroSeen] = useState(false);
+  const [feedPosts, setFeedPosts] = useState<Post[]>(seedPosts);
+  const [composeProducts, setComposeProducts] = useState<ComposeProduct[]>([]);
 
   const value = useMemo<AppState>(
     () => ({
@@ -136,6 +149,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       markChannelsIntroSeen: () => setChannelsIntroSeen(true),
       closetIntroSeen,
       markClosetIntroSeen: () => setClosetIntroSeen(true),
+      feedPosts,
+      addFeedPost: (post) => setFeedPosts((prev) => [post, ...prev]),
+      addReply: (postId, reply) =>
+        setFeedPosts((prev) =>
+          prev.map((p) => (p.id === postId ? { ...p, replies: [...p.replies, reply] } : p))
+        ),
+      composeProducts,
+      setComposeProducts,
+      removeComposeProduct: (id) =>
+        setComposeProducts((prev) => prev.filter((p) => p.id !== id)),
+      clearComposeProducts: () => setComposeProducts([]),
     }),
     [
       profile,
@@ -148,6 +172,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       joinedCircles,
       channelsIntroSeen,
       closetIntroSeen,
+      feedPosts,
+      composeProducts,
     ]
   );
 

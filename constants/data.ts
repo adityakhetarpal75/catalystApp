@@ -286,6 +286,22 @@ export const posts: Post[] = [
     likes: 10,
     replies: [{ author: 'Randy', match: 40, tags: ['24', 'Oily Skin'], body: lorem }],
   },
+  {
+    id: 'p4',
+    circle: '#vintage-finds',
+    author: '@KesTes47',
+    match: 87,
+    tags: ['24', 'Oily Skin'],
+    body: lorem,
+    likes: 18,
+    date: 'Feb 15th',
+    product: { brand: 'Ba&sh', name: 'Vintage Fall Coat' },
+    replies: [
+      { author: 'Justin', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+      { author: 'Randy', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+      { author: 'Lindsey', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+    ],
+  },
 ];
 
 export const postLikers = [

@@ -7,17 +7,19 @@ import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { ImageTile } from '../../components/ui';
 import { beautyProducts, closetItems } from '../../constants/data';
+import { useApp } from '../../context/AppContext';
 import { colors, font, radius, spacing } from '../../constants/theme';
 
 const catalog = [
   ...beautyProducts.map((b) => ({ id: b.id, brand: b.brand, name: b.name, category: 'Beauty' })),
-  ...closetItems.map((c) => ({ id: c.id, brand: c.brand, name: c.name, category: c.category })),
+  ...closetItems.map((c) => ({ id: `c-${c.id}`, brand: c.brand, name: c.name, category: c.category })),
 ];
 
 export default function AddProducts() {
   const router = useRouter();
+  const { composeProducts, setComposeProducts } = useApp();
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(composeProducts.map((p) => p.id));
 
   const results = useMemo(
     () =>
@@ -31,6 +33,14 @@ export default function AddProducts() {
 
   const toggle = (id: string) =>
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const onAdd = () => {
+    const products = catalog
+      .filter((p) => selected.includes(p.id))
+      .map((p) => ({ id: p.id, brand: p.brand, name: p.name }));
+    setComposeProducts(products);
+    router.back();
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -74,9 +84,13 @@ export default function AddProducts() {
 
       <View style={styles.footer}>
         <Button
-          label={selected.length ? `Add ${selected.length} product${selected.length > 1 ? 's' : ''}` : 'Add'}
+          label={
+            selected.length
+              ? `Add ${selected.length} product${selected.length > 1 ? 's' : ''}`
+              : 'Add'
+          }
           disabled={selected.length === 0}
-          onPress={() => router.back()}
+          onPress={onAdd}
         />
       </View>
     </SafeAreaView>
@@ -97,9 +111,19 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, ...font.body, color: colors.text },
   scroll: { paddingHorizontal: spacing.xl, paddingVertical: spacing.lg },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, gap: spacing.md },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    gap: spacing.md,
+  },
   info: { flex: 1 },
-  brand: { ...font.tiny, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase' },
+  brand: {
+    ...font.tiny,
+    color: colors.textMuted,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
   name: { ...font.bodyStrong, color: colors.text, marginTop: 1 },
   category: { ...font.tiny, color: colors.textFaint, marginTop: 1 },
   footer: {
