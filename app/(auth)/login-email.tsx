@@ -5,11 +5,25 @@ import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function LoginEmail() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const { pending, setPending } = useAuth();
+  const [email, setEmail] = useState(pending.email);
+  const [error, setError] = useState('');
+
+  const onNext = () => {
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    setError('');
+    setPending({ email: trimmed });
+    router.push('/(auth)/login-password');
+  };
 
   return (
     <Screen padded={false}>
@@ -24,11 +38,16 @@ export default function LoginEmail() {
           placeholder="name@email.com"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(v) => {
+            setEmail(v);
+            if (error) setError('');
+          }}
         />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Button label="Next" onPress={() => router.push('/(auth)/login-password')} />
+        <Button label="Next" onPress={onNext} />
       </View>
     </Screen>
   );
@@ -38,4 +57,5 @@ const styles = StyleSheet.create({
   body: { flex: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xl },
   title: { ...font.h1, color: colors.text },
   subtitle: { ...font.body, color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.xxl },
+  error: { ...font.small, color: colors.danger, marginBottom: spacing.md, marginTop: -spacing.sm },
 });

@@ -4,12 +4,15 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '../../components/Button';
 import { Header } from '../../components/Header';
 import { Screen } from '../../components/Screen';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function CheckEmail() {
   const router = useRouter();
   const { flow } = useLocalSearchParams<{ flow?: string }>();
+  const { pending, user } = useAuth();
   const isSignup = flow === 'signup';
+  const email = user?.email || pending.email || 'email@example.com';
 
   return (
     <Screen padded={false}>
@@ -20,7 +23,7 @@ export default function CheckEmail() {
           {isSignup
             ? 'We sent a confirmation email to '
             : 'We sent an email to reset your password to '}
-          <Text style={styles.email}>email@example.com.</Text>
+          <Text style={styles.email}>{email}.</Text>
         </Text>
         <Text style={styles.hint}>
           If you haven’t received an email, please check your spam folder or click “resend email” to

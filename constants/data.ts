@@ -154,3 +154,169 @@ export const trades: Trade[] = [
 export const cities = ['San Francisco, CA', 'New York, NY', 'Los Angeles, CA', 'Austin, TX', 'Chicago, IL'];
 export const regions = ['United States', 'Canada', 'United Kingdom', 'Australia'];
 export const states = ['California', 'New York', 'Texas', 'Illinois', 'Washington'];
+
+/* ------------------------------------------------------------------ */
+/* Circles / Channels                                                  */
+/* ------------------------------------------------------------------ */
+
+export interface Circle {
+  id: string;
+  name: string;
+  members: number;
+  joined: boolean;
+  suggested?: boolean;
+}
+
+export const circles: Circle[] = [
+  { id: 'general', name: '#general', members: 100, joined: true },
+  { id: 'product-recs', name: '#product-recs', members: 100, joined: true },
+  { id: 'hauls-shelfies', name: '#hauls-shelfies', members: 100, joined: true },
+  { id: 'app-updates', name: '#app-updates', members: 100, joined: false },
+  { id: 'routine-advice', name: '#routine-advice', members: 100, joined: false },
+  { id: 'random', name: '#random', members: 100, joined: false },
+  { id: 'report-a-bug', name: '#report-a-bug', members: 100, joined: true },
+  { id: 'brand-ambassadors', name: '#brand-ambassadors', members: 100, joined: false },
+  { id: 'vintage-finds', name: '#vintage-finds', members: 100, joined: true },
+  { id: 'fall-outfits', name: '#fall_outfits', members: 100, joined: false },
+];
+
+export interface Reply {
+  author: string;
+  match: number;
+  tags: string[];
+  body: string;
+}
+
+export interface Post {
+  id: string;
+  circle: string;
+  author: string;
+  match: number;
+  tags: string[];
+  body: string;
+  likes: number;
+  replies: Reply[];
+  product?: { brand: string; name: string };
+  date?: string;
+}
+
+const lorem =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin magna lectus est integer sed mauris turpi.';
+
+export const posts: Post[] = [
+  {
+    id: 'p1',
+    circle: '#vintage-finds',
+    author: '@zaraCas',
+    match: 87,
+    tags: ['24', 'Vintage Hawk'],
+    body: lorem,
+    likes: 10,
+    date: 'Feb 15th',
+    product: { brand: 'BRAND NAME', name: 'Product Name' },
+    replies: [
+      { author: 'Justin', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+      { author: 'Randy', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+      { author: 'Lindsey', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+    ],
+  },
+  {
+    id: 'p2',
+    circle: '#product-recs',
+    author: '@KesTes47',
+    match: 87,
+    tags: ['24', 'Oily Skin'],
+    body: lorem,
+    likes: 24,
+    date: 'Feb 16th',
+    replies: [
+      { author: 'Justin', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+      { author: 'Randy', match: 40, tags: ['24', 'Oily Skin'], body: lorem },
+    ],
+  },
+  {
+    id: 'p3',
+    circle: '#hauls-shelfies',
+    author: '@zaraCas',
+    match: 87,
+    tags: ['24', 'Vintage Hawk'],
+    body: lorem,
+    likes: 10,
+    replies: [{ author: 'Randy', match: 40, tags: ['24', 'Oily Skin'], body: lorem }],
+  },
+];
+
+export const postLikers = [
+  { author: 'KesTes47', match: 87, tags: ['24', 'Oily Skin'] },
+  { author: 'zaraCas', match: 81, tags: ['26', 'Vintage Hawk'] },
+  { author: 'Talkingheads', match: 76, tags: ['24', 'Dry Skin'] },
+  { author: 'maincharacter', match: 64, tags: ['28', 'Oily Skin'] },
+  { author: 'Dancingtulip', match: 58, tags: ['24', 'Combo Skin'] },
+];
+
+/* ------------------------------------------------------------------ */
+/* Discover — content & beauty                                         */
+/* ------------------------------------------------------------------ */
+
+export interface Article {
+  id: string;
+  title: string;
+  header: string;
+  author: string;
+  date: string;
+  readTime: string;
+}
+
+export const articles: Article[] = [
+  { id: 'a1', title: 'BIPOC Beauty', header: 'Finding your shade in a whitewashed aisle', author: 'Christine Jaramsingh', date: 'Feb 1, 2022', readTime: '4 min read' },
+  { id: 'a2', title: 'The Vintage Edit', header: 'How to spot real vintage denim', author: 'Mona Mary', date: 'Jan 22, 2022', readTime: '6 min read' },
+  { id: 'a3', title: 'Slow Fashion 101', header: 'A beginner’s guide to buying less', author: 'Tara Lee', date: 'Jan 10, 2022', readTime: '5 min read' },
+];
+
+export interface Creator {
+  id: string;
+  handle: string;
+  match: number;
+  tags: string[];
+  products: number;
+  videos: number;
+  following: number;
+  location: string;
+  bio: string;
+}
+
+export const creators: Creator[] = [
+  { id: 'c1', handle: '@askimlovesbeauty', match: 75, tags: ['Oily Skin', 'Tight Dresses'], products: 30, videos: 100, following: 180, location: 'New York, NY', bio: 'Stepping up my skincare game. Always on the lookout for a good eye cream.' },
+  { id: 'c2', handle: '@vintagevaultsf', match: 88, tags: ['Vintage', 'Denim'], products: 42, videos: 60, following: 240, location: 'San Francisco, CA', bio: 'Curated 90s denim & tees, dropped weekly.' },
+  { id: 'c3', handle: '@thriftwithtara', match: 81, tags: ['Sustainable', 'Neutrals'], products: 18, videos: 34, following: 120, location: 'Austin, TX', bio: 'Slow fashion advocate • she/her.' },
+];
+
+export const brandLogos = [
+  'Dr.Jart+', 'Murad', 'AHAVA', 'TRILLY', 'SEPHORA', 'DERMA E', 'Neutrogena', 'CeraVe', 'ANDALOU',
+];
+
+export interface BeautyProduct {
+  id: string;
+  brand: string;
+  name: string;
+  price: number;
+  points?: number;
+}
+
+export const beautyProducts: BeautyProduct[] = [
+  { id: 'b1', brand: 'Neutrogena', name: 'Oil Free Moisture', price: 35 },
+  { id: 'b2', brand: 'Murad', name: 'Recover Color Corrector', price: 35, points: 1000 },
+  { id: 'b3', brand: 'CLINIQUE', name: 'Moisture Surge', price: 42 },
+  { id: 'b4', brand: 'Dr.Jart+', name: 'Cicapair Cream', price: 48 },
+  { id: 'b5', brand: 'AHAVA', name: 'Mineral Hand Cream', price: 22 },
+  { id: 'b6', brand: 'DERMA E', name: 'Vitamin C Serum', price: 28 },
+];
+
+export const trendingCreators = ['@sakimlovesbeauty', '@glowbymaya', '@beautybymonamary', '@retro.rosa'];
+
+export const routineSteps = [
+  { step: 1, brand: 'Neutrogena', name: 'Gentle Cleanser' },
+  { step: 2, brand: 'DERMA E', name: 'Vitamin C Serum' },
+  { step: 3, brand: 'Neutrogena', name: 'Oil Free Moisture' },
+  { step: 4, brand: 'Murad', name: 'Invisiblur SPF 30' },
+];

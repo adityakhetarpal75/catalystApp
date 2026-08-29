@@ -5,18 +5,21 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { OnboardingScaffold } from '../../components/OnboardingScaffold';
 import { channels } from '../../constants/data';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, radius, spacing } from '../../constants/theme';
 
 export default function Channels() {
   const router = useRouter();
   const { setOnboarding } = useApp();
+  const { completeOnboarding } = useAuth();
   const [joined, setJoined] = useState<string[]>([]);
 
   const toggle = (name: string) =>
     setJoined((prev) => (prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name]));
 
-  const finish = () => {
+  const finish = async () => {
     setOnboarding({ channels: joined });
+    await completeOnboarding();
     router.replace('/(tabs)/home');
   };
 

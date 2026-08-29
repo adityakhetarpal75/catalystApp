@@ -30,11 +30,21 @@ export const colors = {
 
   // Accents / status
   accent: '#4CAF7D', // onboarding green bubble
+  coral: '#FF6B5E', // Discover primary accent / create FAB
+  coralDeep: '#F0503F',
   success: '#2FA36B',
   danger: '#E5484D',
   warning: '#E7B10A',
   tagBg: '#EEF0F2',
   disabled: '#C9CDD2',
+
+  // Dark theme (Discover / brand / creator surfaces)
+  dark: '#0E0F12',
+  darkSurface: '#17181C',
+  darkElevated: '#212329',
+  darkBorder: '#2C2E35',
+  onDarkText: '#F4F5F6',
+  onDarkFaint: '#8A9099',
 } as const;
 
 export const spacing = {

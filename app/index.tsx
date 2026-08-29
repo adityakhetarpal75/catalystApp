@@ -1,22 +1,43 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 import { colors, font } from '../constants/theme';
 
 export default function Splash() {
   const router = useRouter();
+  const { status, user, isLoading } = useAuth();
   const scale = useRef(new Animated.Value(0.8)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const navigated = useRef(false);
 
   useEffect(() => {
     Animated.parallel([
       Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 6 }),
       Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
     ]).start();
-
-    const t = setTimeout(() => router.replace('/(auth)/welcome'), 1600);
-    return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (isLoading || navigated.current) return;
+
+    const t = setTimeout(() => {
+      if (navigated.current) return;
+      navigated.current = true;
+
+      if (status === 'signedIn' && user) {
+        if (user.onboardingComplete) {
+          router.replace('/(tabs)/home');
+        } else {
+          router.replace('/(onboarding)/personal-info');
+        }
+      } else {
+        router.replace('/(auth)/welcome');
+      }
+    }, 1200);
+
+    return () => clearTimeout(t);
+  }, [isLoading, status, user]);
 
   return (
     <View style={styles.container}>
@@ -27,6 +48,7 @@ export default function Splash() {
           </View>
         </View>
         <Text style={styles.tagline}>thrift • trade • belong</Text>
+        {isLoading ? <ActivityIndicator style={{ marginTop: 24 }} color={colors.slate} /> : null}
       </Animated.View>
     </View>
   );

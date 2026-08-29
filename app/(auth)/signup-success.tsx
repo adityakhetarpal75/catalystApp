@@ -1,12 +1,20 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/Button';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function SignupSuccess() {
   const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/(auth)/welcome');
+    }
+  }, [isAuthenticated]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -18,7 +26,10 @@ export default function SignupSuccess() {
           <Text style={styles.spark}>✨</Text>
         </View>
         <Text style={styles.title}>Welcome to Catalyst!</Text>
-        <Text style={styles.subtitle}>Your account was successfully created</Text>
+        <Text style={styles.subtitle}>
+          {user?.firstName ? `Nice to meet you, ${user.firstName}. ` : ''}
+          Your account was successfully created
+        </Text>
         <Text style={styles.hint}>
           Please answer the following questions to connect with community and have a customized
           shopping experience.

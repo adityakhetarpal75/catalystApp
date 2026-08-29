@@ -7,15 +7,18 @@ import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
 import { SocialButton } from '../../components/SocialButton';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function Signup() {
   const router = useRouter();
   const { setProfile } = useApp();
+  const { setPending } = useAuth();
   const [mode, setMode] = useState<'landing' | 'form'>('landing');
   const [email, setEmail] = useState('');
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
+  const [error, setError] = useState('');
 
   if (mode === 'landing') {
     return (
@@ -62,13 +65,23 @@ export default function Signup() {
       <Input label="First Name*" placeholder="Julia" value={first} onChangeText={setFirst} />
       <Input label="Last Name*" placeholder="Jess" value={last} onChangeText={setLast} />
 
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button
         label="Next"
         style={{ marginTop: spacing.lg }}
         onPress={() => {
-          if (first) setProfile({ firstName: first });
-          if (last) setProfile({ lastName: last });
-          if (email) setProfile({ email });
+          const trimmed = email.trim();
+          if (!trimmed || !trimmed.includes('@')) {
+            setError('Please enter a valid email address');
+            return;
+          }
+          if (!first.trim() || !last.trim()) {
+            setError('First and last name are required');
+            return;
+          }
+          setError('');
+          setPending({ email: trimmed, firstName: first.trim(), lastName: last.trim() });
+          setProfile({ firstName: first.trim(), lastName: last.trim(), email: trimmed });
           router.push('/(auth)/signup-password');
         }}
       />
@@ -85,4 +98,5 @@ const styles = StyleSheet.create({
   link: { ...font.small, color: colors.ink, fontWeight: '700' },
   formTitle: { ...font.h1, color: colors.text, marginTop: spacing.md, marginBottom: spacing.xs },
   formSub: { ...font.body, color: colors.textMuted, marginBottom: spacing.xl },
+  error: { ...font.small, color: colors.danger, marginBottom: spacing.sm },
 });

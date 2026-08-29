@@ -2,17 +2,21 @@ import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { colors, font, spacing } from '../../constants/theme';
 
 export default function LoginSuccess() {
   const router = useRouter();
-  const { profile } = useApp();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/(auth)/welcome');
+      return;
+    }
     const t = setTimeout(() => router.replace('/(tabs)/home'), 1800);
     return () => clearTimeout(t);
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -20,7 +24,7 @@ export default function LoginSuccess() {
       <View style={styles.decorBottom} />
       <View style={styles.center}>
         <Text style={styles.wave}>👋</Text>
-        <Text style={styles.name}>{profile.firstName}</Text>
+        <Text style={styles.name}>{user?.firstName || 'Julia'}</Text>
         <Text style={styles.sub}>Welcome back!</Text>
       </View>
     </SafeAreaView>

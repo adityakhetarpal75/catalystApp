@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ClosetItem, closetItems as seedItems } from '../constants/data';
+import { circles as seedCircles, ClosetItem, closetItems as seedItems } from '../constants/data';
 
 interface Profile {
   firstName: string;
@@ -35,6 +35,10 @@ interface AppState {
   rentEnabled: boolean;
   setSellEnabled: (v: boolean) => void;
   setRentEnabled: (v: boolean) => void;
+  joinedCircles: string[];
+  toggleCircle: (id: string) => void;
+  channelsIntroSeen: boolean;
+  markChannelsIntroSeen: () => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -62,6 +66,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<ClosetItem[]>([seedItems[0]]);
   const [sellEnabled, setSellEnabled] = useState(true);
   const [rentEnabled, setRentEnabled] = useState(true);
+  const [joinedCircles, setJoinedCircles] = useState<string[]>(
+    seedCircles.filter((c) => c.joined).map((c) => c.id)
+  );
+  const [channelsIntroSeen, setChannelsIntroSeen] = useState(false);
 
   const value = useMemo<AppState>(
     () => ({
@@ -83,8 +91,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       rentEnabled,
       setSellEnabled,
       setRentEnabled,
+      joinedCircles,
+      toggleCircle: (id) =>
+        setJoinedCircles((prev) =>
+          prev.includes(id) ? prev.filter((c) => c !== id) : [id, ...prev]
+        ),
+      channelsIntroSeen,
+      markChannelsIntroSeen: () => setChannelsIntroSeen(true),
     }),
-    [profile, onboarding, items, wishlist, sellEnabled, rentEnabled]
+    [profile, onboarding, items, wishlist, sellEnabled, rentEnabled, joinedCircles, channelsIntroSeen]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
