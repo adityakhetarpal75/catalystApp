@@ -63,7 +63,21 @@ constants/           # theme tokens + mock data
 context/             # global app state (profile, closet, wishlist, onboarding)
 ```
 
+## Auth (sign in / sign out)
+
+Session state lives in `context/AuthContext.tsx` and is persisted with **AsyncStorage**.
+
+| Action | Behavior |
+| --- | --- |
+| **Sign in** (email or social) | Creates a session with `onboardingComplete: true`, then lands on Home |
+| **Sign up** | Creates a session with `onboardingComplete: false`, then runs the questionnaire |
+| **Finish onboarding** | Marks `onboardingComplete: true` and opens Home |
+| **Sign out** (Settings → confirm) | Clears the stored session and returns to Welcome |
+| **Cold start** | Splash reads the stored session and routes to Home, onboarding, or Welcome |
+
+Tabs are gated: signed-out users are redirected to Welcome; signed-in users who haven’t finished onboarding are sent back to Personal Info.
+
 ## Notes
 
-- State is held in-memory via `context/AppContext` with seeded mock data — there is no backend yet, so the app is a fully navigable, interactive prototype.
-- The design language (near-black primary actions on white surfaces, slate accent screens) follows the provided Catalyst Figma flows.
+- Profile/closet/wishlist data is still in-memory mock data (`AppContext`). Auth session is the only persisted piece.
+- The design language (near-black primary actions on white surfaces, slate accent screens, coral FAB on Discover) follows the Catalyst Figma flows.
