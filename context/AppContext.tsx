@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { circles as seedCircles, ClosetItem, closetItems as seedItems } from '../constants/data';
+import {
+  circles as seedCircles,
+  ClosetItem,
+  closetItems as seedItems,
+  Look,
+  looks as seedLooks,
+} from '../constants/data';
 import { useAuth } from './AuthContext';
 
 interface Profile {
@@ -32,6 +38,9 @@ interface AppState {
   removeItem: (id: string) => void;
   wishlist: ClosetItem[];
   toggleWishlist: (item: ClosetItem) => void;
+  looks: Look[];
+  addLook: (look: Look) => void;
+  removeLook: (id: string) => void;
   sellEnabled: boolean;
   rentEnabled: boolean;
   setSellEnabled: (v: boolean) => void;
@@ -40,6 +49,8 @@ interface AppState {
   toggleCircle: (id: string) => void;
   channelsIntroSeen: boolean;
   markChannelsIntroSeen: () => void;
+  closetIntroSeen: boolean;
+  markClosetIntroSeen: () => void;
 }
 
 const emptyProfile: Profile = {
@@ -57,7 +68,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [profile, setProfileState] = useState<Profile>(emptyProfile);
 
-  // Keep profile in sync with the real signed-in account
   useEffect(() => {
     if (!user) {
       setProfileState(emptyProfile);
@@ -69,7 +79,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       lastName: user.lastName,
       username: user.username,
       email: user.email,
-      // Keep bio/location if already set during onboarding; seed defaults only when empty
       bio: prev.bio || '',
       location: prev.location || '',
     }));
@@ -86,12 +95,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const [items, setItems] = useState<ClosetItem[]>(seedItems);
   const [wishlist, setWishlist] = useState<ClosetItem[]>([seedItems[0]]);
+  const [looksState, setLooksState] = useState<Look[]>(seedLooks);
   const [sellEnabled, setSellEnabled] = useState(true);
   const [rentEnabled, setRentEnabled] = useState(true);
   const [joinedCircles, setJoinedCircles] = useState<string[]>(
     seedCircles.filter((c) => c.joined).map((c) => c.id)
   );
   const [channelsIntroSeen, setChannelsIntroSeen] = useState(false);
+  const [closetIntroSeen, setClosetIntroSeen] = useState(false);
 
   const value = useMemo<AppState>(
     () => ({
@@ -109,6 +120,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ? prev.filter((i) => i.id !== item.id)
             : [item, ...prev]
         ),
+      looks: looksState,
+      addLook: (look) => setLooksState((prev) => [look, ...prev]),
+      removeLook: (id) => setLooksState((prev) => prev.filter((l) => l.id !== id)),
       sellEnabled,
       rentEnabled,
       setSellEnabled,
@@ -116,12 +130,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       joinedCircles,
       toggleCircle: (id) =>
         setJoinedCircles((prev) =>
-          prev.includes(id) ? prev.filter((c) => c !== id) : [id, ...prev]
+          prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
         ),
       channelsIntroSeen,
       markChannelsIntroSeen: () => setChannelsIntroSeen(true),
+      closetIntroSeen,
+      markClosetIntroSeen: () => setClosetIntroSeen(true),
     }),
-    [profile, onboarding, items, wishlist, sellEnabled, rentEnabled, joinedCircles, channelsIntroSeen]
+    [
+      profile,
+      onboarding,
+      items,
+      wishlist,
+      looksState,
+      sellEnabled,
+      rentEnabled,
+      joinedCircles,
+      channelsIntroSeen,
+      closetIntroSeen,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

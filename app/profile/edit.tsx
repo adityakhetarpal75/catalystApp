@@ -3,19 +3,29 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { Button } from '../../components/Button';
+import { CheckRow } from '../../components/CheckRow';
 import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
 import { SelectField } from '../../components/SelectField';
 import { Avatar } from '../../components/ui';
-import { cities, sizeOptions, styleOptions } from '../../constants/data';
+import { cities, identityOptions, sizeOptions, styleOptions } from '../../constants/data';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { colors, font, radius, spacing } from '../../constants/theme';
 
 export default function EditProfile() {
   const router = useRouter();
-  const { profile, setProfile, sellEnabled, rentEnabled, setSellEnabled, setRentEnabled } = useApp();
+  const {
+    profile,
+    setProfile,
+    onboarding,
+    setOnboarding,
+    sellEnabled,
+    rentEnabled,
+    setSellEnabled,
+    setRentEnabled,
+  } = useApp();
   const { updateUser } = useAuth();
 
   const [firstName, setFirstName] = useState(profile.firstName);
@@ -24,15 +34,30 @@ export default function EditProfile() {
   const [bio, setBio] = useState(profile.bio);
   const [location, setLocation] = useState(profile.location);
   const [email, setEmail] = useState(profile.email);
-  const [persona, setPersona] = useState<string[]>(['retro']);
-  const [topSize, setTopSize] = useState<string>('S');
+  const [birthday, setBirthday] = useState(onboarding.birthday || '');
+  const [identities, setIdentities] = useState<string[]>(onboarding.identities || []);
+  const [persona, setPersona] = useState<string[]>(
+    onboarding.style ? [onboarding.style] : ['retro']
+  );
+  const [topSize, setTopSize] = useState<string>(onboarding.sizes.tops || 'S');
 
   const togglePersona = (key: string) =>
     setPersona((p) => (p.includes(key) ? p.filter((x) => x !== key) : [...p, key]));
 
+  const toggleIdentity = (opt: string) =>
+    setIdentities((prev) =>
+      prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
+    );
+
   const save = async () => {
     const cleanUser = username.trim().replace(/^@/, '');
     setProfile({ firstName, lastName, username: cleanUser, bio, location, email });
+    setOnboarding({
+      birthday: birthday || undefined,
+      identities,
+      style: persona[0],
+      sizes: { ...onboarding.sizes, tops: topSize },
+    });
     await updateUser({ firstName, lastName, username: cleanUser, email });
     router.back();
   };
@@ -42,7 +67,12 @@ export default function EditProfile() {
       <Header title="Edit Profile" />
       <View style={styles.body}>
         <View style={styles.photoWrap}>
-          <Avatar name={username} size={88} ring />
+          <View style={styles.photoCircle}>
+            <Avatar name={username} size={88} />
+            <View style={styles.cameraBadge}>
+              <Ionicons name="camera" size={14} color={colors.white} />
+            </View>
+          </View>
           <Pressable style={styles.editPhoto}>
             <Text style={styles.editPhotoText}>Edit Photo</Text>
           </Pressable>
@@ -63,8 +93,39 @@ export default function EditProfile() {
         />
         <View style={{ height: spacing.lg }} />
 
-        <SelectField label="Location" placeholder="Selection" value={location} options={cities} onChange={setLocation} />
-        <Input label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+        <SelectField
+          label="Location"
+          placeholder="Selection"
+          value={location}
+          options={cities}
+          onChange={setLocation}
+        />
+        <Input
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Input
+          label="Date of Birth"
+          placeholder="March 15, 1998"
+          value={birthday}
+          onChangeText={setBirthday}
+        />
+
+        <View style={styles.divider} />
+
+        <Text style={styles.groupLabel}>Identity</Text>
+        {identityOptions.map((opt) => (
+          <CheckRow
+            key={opt}
+            label={opt}
+            checked={identities.includes(opt)}
+            onPress={() => toggleIdentity(opt)}
+          />
+        ))}
 
         <View style={styles.divider} />
 
@@ -73,8 +134,16 @@ export default function EditProfile() {
           {styleOptions.slice(0, 4).map((s) => {
             const active = persona.includes(s.key);
             return (
-              <Pressable key={s.key} style={[styles.circle, active && styles.circleActive]} onPress={() => togglePersona(s.key)}>
-                <Ionicons name="shirt-outline" size={20} color={active ? colors.white : colors.textMuted} />
+              <Pressable
+                key={s.key}
+                style={[styles.circle, active && styles.circleActive]}
+                onPress={() => togglePersona(s.key)}
+              >
+                <Ionicons
+                  name="shirt-outline"
+                  size={20}
+                  color={active ? colors.white : colors.textMuted}
+                />
               </Pressable>
             );
           })}
@@ -85,7 +154,11 @@ export default function EditProfile() {
           {sizeOptions.tops.slice(0, 4).map((s) => {
             const active = topSize === s;
             return (
-              <Pressable key={s} style={[styles.circle, active && styles.circleActive]} onPress={() => setTopSize(s)}>
+              <Pressable
+                key={s}
+                style={[styles.circle, active && styles.circleActive]}
+                onPress={() => setTopSize(s)}
+              >
                 <Text style={[styles.circleText, active && { color: colors.white }]}>{s}</Text>
               </Pressable>
             );
@@ -113,6 +186,18 @@ export default function EditProfile() {
 const styles = StyleSheet.create({
   body: { paddingHorizontal: spacing.xl, paddingTop: spacing.md },
   photoWrap: { alignItems: 'center', marginBottom: spacing.xl },
+  photoCircle: { position: 'relative' },
+  cameraBadge: {
+    position: 'absolute',
+    right: 2,
+    bottom: 2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   editPhoto: {
     marginTop: spacing.sm,
     borderWidth: 1,
@@ -154,6 +239,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.lg,
   },
-  prefRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.md },
+  prefRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+  },
   prefText: { ...font.body, color: colors.text, flex: 1, marginRight: spacing.md },
 });

@@ -38,7 +38,7 @@ export default function EditCloset() {
           {wishlist.map((item) => (
             <RemovableTile key={item.id} label={item.name} onRemove={() => toggleWishlist(item)} />
           ))}
-          {wishlist.length === 0 ? <Text style={styles.empty}>No wishlist items</Text> : null}
+          {wishlist.length === 0 ? <Text style={styles.empty}>No wishlist items yet</Text> : null}
         </View>
 
         {Object.keys(byCategory).map((cat) => (
@@ -46,7 +46,12 @@ export default function EditCloset() {
             <Text style={styles.section}>{cat}</Text>
             <View style={styles.grid}>
               {byCategory[cat].map((item) => (
-                <RemovableTile key={item.id} label={item.name} onRemove={() => removeItem(item.id)} />
+                <RemovableTile
+                  key={item.id}
+                  label={item.name}
+                  rent={item.forRent}
+                  onRemove={() => removeItem(item.id)}
+                />
               ))}
             </View>
           </View>
@@ -60,12 +65,25 @@ export default function EditCloset() {
   );
 }
 
-function RemovableTile({ label, onRemove }: { label: string; onRemove: () => void }) {
+function RemovableTile({
+  label,
+  onRemove,
+  rent,
+}: {
+  label: string;
+  onRemove: () => void;
+  rent?: boolean;
+}) {
   return (
     <View style={styles.tileWrap}>
       <ImageTile aspectRatio={0.85} icon="shirt-outline" />
+      {rent ? (
+        <View style={styles.rentBadge}>
+          <Text style={styles.rentText}>RENT</Text>
+        </View>
+      ) : null}
       <Pressable style={styles.removeBtn} onPress={onRemove} hitSlop={8}>
-        <Ionicons name="close" size={16} color={colors.white} />
+        <Ionicons name="close" size={14} color={colors.white} />
       </Pressable>
       <Text style={styles.tileLabel} numberOfLines={1}>
         {label}
@@ -79,7 +97,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.xl, paddingBottom: spacing.xl },
   section: { ...font.h3, color: colors.text, marginTop: spacing.lg, marginBottom: spacing.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  tileWrap: { width: '31%', marginBottom: spacing.lg },
+  tileWrap: { width: '31%', marginBottom: spacing.lg, position: 'relative' },
   removeBtn: {
     position: 'absolute',
     top: -6,
@@ -92,8 +110,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
+  rentBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: colors.ink,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.sm,
+    zIndex: 1,
+  },
+  rentText: { ...font.tiny, color: colors.white, fontWeight: '800', fontSize: 9 },
   tileLabel: { ...font.tiny, color: colors.textMuted, marginTop: 4 },
-  empty: { ...font.small, color: colors.textFaint },
+  empty: { ...font.small, color: colors.textFaint, marginBottom: spacing.md },
   footer: {
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.sm,

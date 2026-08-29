@@ -98,10 +98,42 @@ export interface ClosetItem {
   material?: string;
   tags?: string[];
   forRent?: boolean;
+  description?: string;
+  notes?: string[];
 }
 
+/** Empty-state sell category tiles shown in Figma when a shelf has no items yet. */
+export const sellCategoryPlaceholders = [
+  'Pants',
+  'Tops',
+  'Sweaters',
+  'Coats / Jackets',
+  'Shoes',
+  'Bags',
+];
+
+export const rentCategoryPlaceholders = ['Dress', 'Vintage Coat', 'Sari'];
+
 export const closetItems: ClosetItem[] = [
-  { id: '1', brand: 'Ba&sh', name: 'Vintage Fall Coat', price: 75, size: 'S', category: 'Coats / Jackets', color: 'Brown', condition: 'Gently used', material: 'Wool', tags: ['Vintage', 'Cozy', 'Fall'] },
+  {
+    id: '1',
+    brand: 'Ba&sh',
+    name: 'Vintage Fall Coat',
+    price: 75,
+    size: 'S',
+    category: 'Coats / Jackets',
+    color: 'Brown',
+    condition: 'Gently used',
+    material: 'Wool',
+    tags: ['Vintage', 'Cozy', 'Fall'],
+    description:
+      'The perfect vintage fall coat for you to fall in love with. The colour goes with all kinds of outfits and elevates any look effortlessly.',
+    notes: [
+      'Gently worn, no visible flaws or stains.',
+      'Ships within 2 business days from San Francisco.',
+      'Open to bundles — check out the rest of my closet!',
+    ],
+  },
   { id: '2', brand: 'Levi’s', name: '501 Cropped Jean', price: 42, size: '27', category: 'Pants', color: 'Blue', condition: 'Like new', material: 'Denim', tags: ['Denim', '90s'] },
   { id: '3', brand: 'Reformation', name: 'Floral Baby Tee', price: 28, size: 'S', category: 'Blouses', color: 'Pink', condition: 'Like new', material: 'Cotton', tags: ['Y2K', 'Cute'] },
   { id: '4', brand: 'COS', name: 'Boxy Grey Tee', price: 18, size: 'M', category: 'Tops', color: 'Grey', condition: 'Gently used', material: 'Cotton', tags: ['Basics'] },
@@ -109,6 +141,19 @@ export const closetItems: ClosetItem[] = [
   { id: '6', brand: 'Aritzia', name: 'Wool Blend Blazer', price: 60, size: 'S', category: 'Coats / Jackets', color: 'Beige', condition: 'Like new', material: 'Wool', tags: ['Workwear'] },
   { id: '7', brand: 'Madewell', name: 'Linen Shirt Dress', price: 48, size: 'S', category: 'Dresses', color: 'White', condition: 'Gently used', material: 'Linen', tags: ['Summer'], forRent: true },
   { id: '8', brand: 'Nike', name: 'Vintage Windbreaker', price: 35, size: 'L', category: 'Coats / Jackets', color: 'Blue', condition: 'Well loved', material: 'Polyester', tags: ['Sporty'], forRent: true },
+];
+
+export interface Look {
+  id: string;
+  title: string;
+  itemCount: number;
+}
+
+export const looks: Look[] = [
+  { id: 'l1', title: 'Fall layering', itemCount: 4 },
+  { id: 'l2', title: 'Weekend denim', itemCount: 3 },
+  { id: 'l3', title: 'Date night', itemCount: 5 },
+  { id: 'l4', title: 'Work neutrals', itemCount: 4 },
 ];
 
 export interface Order {
