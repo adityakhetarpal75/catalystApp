@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
   useCallback,
@@ -7,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { storage } from '../lib/storage';
 
 const AUTH_KEY = 'catalyst.auth.session';
 
@@ -49,9 +49,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 async function persist(user: AuthUser | null) {
   if (user) {
-    await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(user));
+    await storage.setItem(AUTH_KEY, JSON.stringify(user));
   } else {
-    await AsyncStorage.removeItem(AUTH_KEY);
+    await storage.removeItem(AUTH_KEY);
   }
 }
 
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(AUTH_KEY);
+        const raw = await storage.getItem(AUTH_KEY);
         if (cancelled) return;
         if (raw) {
           const parsed = JSON.parse(raw) as AuthUser;

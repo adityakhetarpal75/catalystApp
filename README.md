@@ -65,7 +65,7 @@ context/             # global app state (profile, closet, wishlist, onboarding)
 
 ## Auth (sign in / sign out)
 
-Session state lives in `context/AuthContext.tsx` and is persisted with **AsyncStorage**.
+Session state lives in `context/AuthContext.tsx` (stored via `lib/storage.ts`).
 
 | Action | Behavior |
 | --- | --- |
